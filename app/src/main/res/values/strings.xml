@@ -1,0 +1,12 @@
+<resources>
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_templates">Templates</string>
+    <string name="tab_saved">My Designs</string>
+    <string name="tab_profile">Profile</string>
+    <string name="lbl_welcome">Welcome</string>
+    <string name="lbl_achievement">Achievement</string>
+    <string name="lbl_birthday">Birthday</string>
+    <string name="lbl_income">Income</string>
+    <string name="text_hint">Enter Text</string>
+    <string name="save_poster">Save Design</string>
+</resources>

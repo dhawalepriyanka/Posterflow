@@ -1,0 +1,22 @@
+*.iml
+.gradle/
+.kotlin/
+build/
+app/build/
+*build_old*
+local.properties
+.idea/
+.DS_Store
+/captures
+.externalNativeBuild
+.cxx
+.env
+debug.keystore
+
+# Root scratch & log files
+/*.png
+/*.log
+/*.jar
+/decompiled*.java
+/window.xml
+

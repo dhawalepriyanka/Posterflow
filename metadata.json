@@ -1,0 +1,6 @@
+{
+  "name": "Poster Maker",
+  "description": "An interactive, feature-rich poster and banner designer with customizable templates (Birthday, Festival, Political), customizable text and stickers, and local persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

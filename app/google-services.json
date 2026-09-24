@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1006845795069",
+    "project_id": "posterflow-42591",
+    "storage_bucket": "posterflow-42591.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006845795069:android:a8f29850caf1a7b1afbc94",
+        "android_client_info": {
+          "package_name": "com.aistudio.postermaker.shydv"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1006845795069-nenl9spqhrab5cu739nck4pj9kp145rs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aistudio.postermaker.shydv",
+            "certificate_hash": "c64654a3f7b5b6392db523a98d248451b692a838"
+          }
+        },
+        {
+          "client_id": "1006845795069-bgvqv6mepumpf6014v2e85ku458god5v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVEeOoLSxi0MkkWNU-VTJQgusVkus_iy4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1006845795069-bgvqv6mepumpf6014v2e85ku458god5v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
