@@ -275,104 +275,82 @@ object StarterTemplates {
     )
 
     /* ---------------------------------------------------------------------- */
-    /* 3. ACHIEVEMENT TEMPLATES (6 professional recognition templates)       */
+    /* 3. ACHIEVEMENT TEMPLATES (5 curated high-fidelity base-template posters) */
     /* ---------------------------------------------------------------------- */
     private val achievementTemplates = listOf(
-        // Star Performer
+        // 01 — HINDI BLUE TROPHY (achieve_hindi_blue_base.jpg)
         PosterTemplate(
-            id = -401, name = "Star Performer", category = "Achievement",
-            baseColor = "#0D1B2A", accentColor = "#E0A96D", style = 301, order = 0,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#070E16", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#FFF8F0", textColor = "#0D1B2A", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("STAR PERFORMER", 80f, 135f, 920f, 85f, size = 68f, color = "#E0A96D", alignment = "center"),
-                StaticText("OUTSTANDING DEDICATION & EXCELLENCE", 80f, 220f, 920f, 40f, size = 22f, color = "#FFFFFF", alignment = "center", bold = false)
-            ),
+            id = -401, name = "Hindi Blue Trophy Achievement", category = "Achievement",
+            baseColor = "#0A2558", accentColor = "#F59E0B", style = 301, order = 0,
+            backgroundArtwork = "res:achieve_hindi_blue_base",
+            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
+            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#0A2558", textColor = "#FFFFFF", showLogo = true),
+            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#FFFFFF", textColor = "#0A2558", showLogo = false, showPhone = true, showWebsite = true),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 340f, y = 280f, width = 400f, height = 400f, shape = "circle", borderColor = "#E0A96D", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 715f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.ACHIEVEMENT, required = true, x = 80f, y = 785f, width = 920f, height = 55f, fontSize = 32f, color = "#E0A96D", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 850f, width = 880f, height = 65f, fontSize = 22f, color = "#CFD8DC", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 35f, y = 160f, width = 430f, height = 430f, shape = "circle", borderColor = "#F5B738", borderWidth = 5f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 50f, y = 570f, width = 495f, height = 75f, fontSize = 34f, color = "#0F172A", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 160f, y = 650f, width = 280f, height = 45f, fontSize = 18f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 740f, width = 480f, height = 120f, fontSize = 20f, color = "#FFFFFF", alignment = "left")
             )
         ),
-        // Top Achiever
+        // 02 — HINDI ROYAL CROWN (achieve_hindi_red_base.jpg)
         PosterTemplate(
-            id = -402, name = "Top Achiever", category = "Achievement",
-            baseColor = "#16161A", accentColor = "#72757E", style = 302, order = 1,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#0A0A0C", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#0A0A0C", textColor = "#2CB67D", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("TOP ACHIEVER", 80f, 140f, 920f, 80f, size = 64f, color = "#2CB67D", alignment = "center")
-            ),
+            id = -402, name = "Hindi Royal Crown Achievement", category = "Achievement",
+            baseColor = "#7A0C18", accentColor = "#D4AF37", style = 302, order = 1,
+            backgroundArtwork = "res:achieve_hindi_red_base",
+            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
+            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#7A0C18", textColor = "#FFFFFF", showLogo = true),
+            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#4A060E", textColor = "#D4AF37", showLogo = false, showPhone = true, showWebsite = true),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 320f, y = 240f, width = 440f, height = 460f, shape = "rounded", borderColor = "#2CB67D", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 725f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.ACHIEVEMENT, required = true, x = 80f, y = 795f, width = 920f, height = 55f, fontSize = 32f, color = "#2CB67D", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 860f, width = 880f, height = 55f, fontSize = 22f, color = "#94A1B2", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 620f, y = 195f, width = 335f, height = 410f, shape = "rounded", borderColor = "#D4AF37", borderWidth = 5f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 90f, y = 465f, width = 400f, height = 85f, fontSize = 34f, color = "#5C0A14", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 140f, y = 554f, width = 300f, height = 46f, fontSize = 18f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 80f, y = 640f, width = 420f, height = 140f, fontSize = 20f, color = "#3A060E", alignment = "left")
             )
         ),
-        // Congratulations
+        // 03 — MARATHI MINT SALUTE (achieve_marathi_mint_base.jpg)
         PosterTemplate(
-            id = -403, name = "Congratulations", category = "Achievement",
-            baseColor = "#2A0E35", accentColor = "#FFD166", style = 303, order = 2,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#17061E", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#FFFDF5", textColor = "#2A0E35", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("CONGRATULATIONS", 80f, 140f, 920f, 85f, size = 66f, color = "#FFD166", alignment = "center")
-            ),
+            id = -403, name = "Marathi Mint Salute", category = "Achievement",
+            baseColor = "#F2F9F6", accentColor = "#0E4B3E", style = 303, order = 2,
+            backgroundArtwork = "res:achieve_marathi_mint_base",
+            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
+            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#F2F9F6", textColor = "#0E4B3E", showLogo = true),
+            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#072A22", textColor = "#48BB78", showLogo = false, showPhone = true, showWebsite = true),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 330f, y = 245f, width = 420f, height = 455f, shape = "rounded", borderColor = "#FFD166", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 725f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.ACHIEVEMENT, required = true, x = 80f, y = 795f, width = 920f, height = 55f, fontSize = 32f, color = "#FFD166", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 860f, width = 880f, height = 60f, fontSize = 22f, color = "#F0DDF6", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 560f, y = 120f, width = 425f, height = 430f, shape = "arch", borderColor = "#D4AF37", borderWidth = 5f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 530f, y = 552f, width = 425f, height = 83f, fontSize = 34f, color = "#0E3F3B", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 595f, y = 628f, width = 290f, height = 44f, fontSize = 18f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 550f, y = 720f, width = 410f, height = 140f, fontSize = 20f, color = "#0E3F3B", alignment = "left")
             )
         ),
-        // Achievement Unlocked
+        // 04 — MARATHI SAFFRON GOLD (achieve_marathi_orange_base.jpg)
         PosterTemplate(
-            id = -404, name = "Achievement Unlocked", category = "Achievement",
-            baseColor = "#0B1E36", accentColor = "#00F5D4", style = 304, order = 3,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#050F1C", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#050F1C", textColor = "#00F5D4", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("ACHIEVEMENT UNLOCKED", 80f, 140f, 920f, 80f, size = 54f, color = "#00F5D4", alignment = "center")
-            ),
+            id = -404, name = "Marathi Saffron Gold Achievement", category = "Achievement",
+            baseColor = "#FFF6EA", accentColor = "#E05A10", style = 304, order = 3,
+            backgroundArtwork = "res:achieve_marathi_orange_base",
+            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
+            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#FFF6EA", textColor = "#E05A10", showLogo = true),
+            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#660A14", textColor = "#F5B738", showLogo = false, showPhone = true, showWebsite = true),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 340f, y = 250f, width = 400f, height = 450f, shape = "rounded", borderColor = "#00F5D4", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 725f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.ACHIEVEMENT, required = true, x = 80f, y = 795f, width = 920f, height = 55f, fontSize = 32f, color = "#00F5D4", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 860f, width = 880f, height = 55f, fontSize = 22f, color = "#CCFBF4", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 55f, y = 130f, width = 425f, height = 425f, shape = "circle", borderColor = "#E5A932", borderWidth = 5f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 490f, y = 478f, width = 435f, height = 92f, fontSize = 34f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 525f, y = 568f, width = 365f, height = 47f, fontSize = 18f, color = "#660A14", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 460f, y = 650f, width = 440f, height = 130f, fontSize = 20f, color = "#4A060E", alignment = "left")
             )
         ),
-        // New Milestone
+        // 05 — ENGLISH PROUD MOMENT (achieve_english_purple_base.jpg)
         PosterTemplate(
-            id = -405, name = "New Milestone", category = "Achievement",
-            baseColor = "#1B2A1E", accentColor = "#F9C74F", style = 305, order = 4,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#0D1710", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#FFFDF5", textColor = "#1B2A1E", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("NEW MILESTONE", 80f, 140f, 920f, 80f, size = 60f, color = "#F9C74F", alignment = "center")
-            ),
+            id = -405, name = "English Proud Moment", category = "Achievement",
+            baseColor = "#1A0318", accentColor = "#F5B738", style = 305, order = 4,
+            backgroundArtwork = "res:achieve_english_purple_base",
+            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
+            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#1A0318", textColor = "#FFFFFF", showLogo = true),
+            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#120110", textColor = "#F5B738", showLogo = false, showPhone = true, showWebsite = true),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 340f, y = 250f, width = 400f, height = 400f, shape = "circle", borderColor = "#F9C74F", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 715f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.ACHIEVEMENT, required = true, x = 80f, y = 785f, width = 920f, height = 55f, fontSize = 32f, color = "#F9C74F", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 850f, width = 880f, height = 65f, fontSize = 22f, color = "#DDEEE1", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // Business Champion
-        PosterTemplate(
-            id = -406, name = "Business Champion", category = "Achievement",
-            baseColor = "#300D18", accentColor = "#E9C46A", style = 306, order = 5,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#1A050B", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#1A050B", textColor = "#E9C46A", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("BUSINESS CHAMPION", 80f, 140f, 920f, 80f, size = 58f, color = "#E9C46A", alignment = "center")
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 320f, y = 240f, width = 440f, height = 460f, shape = "rounded", borderColor = "#E9C46A", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 725f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.ACHIEVEMENT, required = true, x = 80f, y = 795f, width = 920f, height = 55f, fontSize = 32f, color = "#E9C46A", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 860f, width = 880f, height = 55f, fontSize = 22f, color = "#F7D8E0", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 65f, y = 100f, width = 445f, height = 445f, shape = "circle", borderColor = "#F5B738", borderWidth = 5f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 60f, y = 585f, width = 495f, height = 90f, fontSize = 34f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 150f, y = 672f, width = 310f, height = 48f, fontSize = 18f, color = "#F5B738", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 580f, y = 430f, width = 390f, height = 150f, fontSize = 20f, color = "#FFFFFF", alignment = "left")
             )
         )
     )

@@ -138,7 +138,9 @@ internal fun FastPosterBrowsingScreen(
     // Person name and designation — poster-specific overrides
     // For Welcome templates, the leader branding already carries the owner's name/title from App Settings,
     // so the welcomee slots start empty and ready for the user to edit.
-    val isGreetCategory = category.equals("Welcome", ignoreCase = true) || category.equals("Birthday", ignoreCase = true)
+    val isGreetCategory = category.equals("Welcome", ignoreCase = true) ||
+            category.equals("Birthday", ignoreCase = true) ||
+            category.equals("Achievement", ignoreCase = true)
     var customPersonName by rememberSaveable(category) {
         mutableStateOf(if (isGreetCategory) "" else profile.userName)
     }

@@ -162,6 +162,10 @@ object TemplateRenderer {
             BirthdayArtworkRenderer.draw(context, c, d)
             return
         }
+        if (AchievementArtworkRenderer.supports(t)) {
+            AchievementArtworkRenderer.draw(context, c, d)
+            return
+        }
         c.drawColor(color(t.baseColor))
         val artwork = TemplateImages.read(context, t.backgroundArtwork)
         if (artwork != null) image(c, artwork, RectF(0f, 0f, 1080f, 1080f), contain = true)
