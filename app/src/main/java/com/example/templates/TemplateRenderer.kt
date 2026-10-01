@@ -73,10 +73,14 @@ object TemplateImages {
 @Composable
 fun ReadyPosterPreview(design: GeneratedPoster, modifier: Modifier = Modifier, resolution: Int = 720) {
     val context = LocalContext.current
-    val bitmap by produceState<Bitmap?>(null, design, resolution) {
-        value = withContext(Dispatchers.Default) { TemplateRenderer.render(context, design, resolution) }
+    var currentBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    LaunchedEffect(design, resolution) {
+        val bmp = withContext(Dispatchers.Default) {
+            TemplateRenderer.render(context, design, resolution)
+        }
+        currentBitmap = bmp
     }
-    bitmap?.let {
+    currentBitmap?.let {
         Image(it.asImageBitmap(), "${design.template.name} poster preview", modifier.fillMaxWidth().aspectRatio(1f), contentScale = ContentScale.Fit)
     } ?: androidx.compose.foundation.layout.Box(modifier.fillMaxWidth().aspectRatio(1f))
 }
@@ -150,6 +154,14 @@ object TemplateRenderer {
 
     private fun draw(context: Context, c: Canvas, d: GeneratedPoster) {
         val t = d.template
+        if (WelcomeArtworkRenderer.supports(t)) {
+            WelcomeArtworkRenderer.draw(context, c, d)
+            return
+        }
+        if (BirthdayArtworkRenderer.supports(t)) {
+            BirthdayArtworkRenderer.draw(context, c, d)
+            return
+        }
         c.drawColor(color(t.baseColor))
         val artwork = TemplateImages.read(context, t.backgroundArtwork)
         if (artwork != null) image(c, artwork, RectF(0f, 0f, 1080f, 1080f), contain = true)
@@ -170,8 +182,8 @@ object TemplateRenderer {
                         st.size, st.color, st.bold, false, "sans-serif", st.alignment, st.maxLines, isGold)
                 }
             }
-            // Skip standard name-plate for split-layout templates and Welcome templates (130-141)
-            val skipNameplate = (t.photoPosition in listOf("right", "left") && t.style in (611..920)) || t.style == 220 || t.style in 130..141
+            // Skip standard name-plate for split-layout templates and Welcome templates (130-155)
+            val skipNameplate = (t.photoPosition in listOf("right", "left") && t.style in (611..920)) || t.style == 220 || t.style in 130..155
             if (!skipNameplate) {
                 t.slots.firstOrNull { it.enabled && it.field == TemplateField.NAME }?.let { s ->
                     val r = RectF(s.x - 12, s.y - 6, s.x + s.width + 12, s.y + s.height + 6)
@@ -212,7 +224,7 @@ object TemplateRenderer {
         }
         if (t.header.enabled) band(context, c, t.header, 0f, d.branding)
         if (t.footer.enabled) {
-            if (t.style in 130..141) drawFixedBrandingFooter(context, c, t, d)
+            if (t.style in 130..155) drawFixedBrandingFooter(context, c, t, d)
             else band(context, c, t.footer, 1080f - t.footer.height, d.branding)
         }
     }
@@ -628,7 +640,6 @@ object TemplateRenderer {
                 p.style = Paint.Style.FILL; p.color = accent; p.alpha = 15
                 c.drawRect(0f, 180f, 1080f, 185f, p)
             }
-
             201 -> { // 01 Royal Birthday: Spotlight halo & gift ornament accents
                 p.style = Paint.Style.FILL; p.color = accent; p.alpha = 25
                 c.drawCircle(540f, 485f, 320f, p)
@@ -1447,8 +1458,8 @@ object TemplateRenderer {
             when(b.layout){"right"->right=logoX-26;"center"->textTop=y+logoSize+18;else->left=logoX+logoSize+26}
         }
         val lines=buildList {
-            val companyName = brand.company.ifBlank { "YOUR BUSINESS" }
-            if(b.showCompanyName) add(companyName)
+            val companyName = brand.company.trim()
+            if(b.showCompanyName && companyName.isNotBlank()) add(companyName)
             if(b.showTagline && brand.tagline.isNotBlank()) add(brand.tagline)
             val contact=buildList {
                 if(b.showPhone && brand.phone.isNotBlank()) add(brand.phone)
@@ -1456,7 +1467,7 @@ object TemplateRenderer {
                 if(b.showEmail && brand.email.isNotBlank()) add(brand.email)
             }
             if(contact.isNotEmpty()) add(contact.joinToString("   •   "))
-            else if(b.showPhone || b.showWebsite) add("+91 98765 43210   •   www.yourbusiness.com")
+            // No real contact data — do not show any placeholder text
             if(b.showAddress && brand.address.isNotBlank()) add(brand.address)
         }
         val available=(y+b.height-14-textTop).coerceAtLeast(16f)
@@ -1584,23 +1595,21 @@ object TemplateRenderer {
                     c.drawCircle(cx - 8f, iconCy, 2.5f, dotPaint)
                 }
             }
-        } else {
-            // Fallback: show placeholder contact
-            text(c, "+91 98765 43210   •   www.yourbusiness.com",
-                RectF(30f, contactY, 1050f, contactY + contactH),
-                18f, textClr, bold = false, italic = false, font = "sans-serif", align = "left", maxLines = 1)
         }
+        // No contact info set — nothing shown (no placeholder text displayed)
+
 
         // ---- Row 3: Business name centered (y+152 to y+185) ----
-        val bizName = b.company.ifBlank { "YOUR BUSINESS" }
-        val bizNameY = y + 155f
-        text(c, bizName.uppercase(), RectF(30f, bizNameY, 1050f, bizNameY + 32f),
-            22f, textClr, bold = true, italic = false, font = "sans-serif", align = "center", maxLines = 1)
-
-        // Tagline (if available)
-        if (b.tagline.isNotBlank()) {
-            text(c, b.tagline, RectF(80f, bizNameY + 30f, 1000f, bizNameY + 52f),
-                14f, textClr, bold = false, italic = true, font = "sans-serif", align = "center", maxLines = 1)
+        val bizName = b.company.trim()
+        if (bizName.isNotBlank()) {
+            val bizNameY = y + 155f
+            text(c, bizName.uppercase(), RectF(30f, bizNameY, 1050f, bizNameY + 32f),
+                22f, textClr, bold = true, italic = false, font = "sans-serif", align = "center", maxLines = 1)
+            // Tagline (if available)
+            if (b.tagline.isNotBlank()) {
+                text(c, b.tagline, RectF(80f, bizNameY + 30f, 1000f, bizNameY + 52f),
+                    14f, textClr, bold = false, italic = true, font = "sans-serif", align = "center", maxLines = 1)
+            }
         }
     }
 
@@ -1932,10 +1941,28 @@ object TemplateRenderer {
         var result=layout()
         while((result.height>box.height() || result.lineCount>maxLines || words.any { p.measureText(it)>box.width() }) && textSize>6f){textSize-=1f;result=layout()}
         if(gold) {
-            p.shader=LinearGradient(0f,0f,0f,result.height.toFloat().coerceAtLeast(1f),intArrayOf(color("#FFF2BA"),color("#F5C75D"),color("#AD6F1D"),color("#FFE5A1")),floatArrayOf(0f,.42f,.65f,1f),Shader.TileMode.CLAMP)
-            p.setShadowLayer(2f,0f,3f,Color.BLACK)
+            p.shader = LinearGradient(0f, 0f, 0f, result.height.toFloat().coerceAtLeast(1f),
+                intArrayOf(color("#FFFBE3"), color("#F5C753"), color("#DA9C20"), color("#FFF6B0"), color("#99660A")),
+                floatArrayOf(0f, .28f, .62f, .85f, 1f), Shader.TileMode.CLAMP)
+            p.setShadowLayer(4f, 0f, 2f, Color.argb(160, 0, 0, 0))
         }
-        c.save();c.clipRect(box);c.translate(box.left,box.top+max(0f,(box.height()-result.height)/2));result.draw(c);c.restore()
+        val textY = box.top + max(0f, (box.height() - result.height) / 2)
+        if (gold && bold) {
+            val shadowPaint = TextPaint(p).apply {
+                shader = null
+                color = Color.rgb(55, 33, 4)
+                setShadowLayer(0f, 0f, 0f, 0)
+            }
+            val shadowLayout = StaticLayout.Builder.obtain(value, 0, value.length, shadowPaint, box.width().toInt().coerceAtLeast(1))
+                .setAlignment(alignment).setIncludePad(false).setLineSpacing(2f, 1f).build()
+            for (pass in 5 downTo 1) {
+                c.save()
+                c.translate(box.left + pass * 1.5f, textY + pass * 1.8f)
+                shadowLayout.draw(c)
+                c.restore()
+            }
+        }
+        c.save(); c.clipRect(box); c.translate(box.left, textY); result.draw(c); c.restore()
     }
 }
 

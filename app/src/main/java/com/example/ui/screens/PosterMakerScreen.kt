@@ -33,6 +33,11 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -777,8 +782,10 @@ fun PosterMakerScreen(
                         onManageTemplates = { navigateToRoot("template_admin") },
                         profileSettings = profileSettings,
                         onCompanyLogoSelected = { viewModel.updateCompanyLogo(it) },
+                        onLeaderImageSelected = { viewModel.updateLeaderImage(it) },
                         onCompanyNameChange = { viewModel.updateCompanyName(it) },
                         onWebsiteNameChange = { viewModel.updateWebsiteName(it) },
+                        onMobileNumberChange = { viewModel.updateBusinessContact("Phone", it) },
                         onThemeModeChange = { viewModel.updateThemeMode(it) },
                         onNotificationChange = { key, enabled -> viewModel.updateNotificationPreference(key, enabled) },
                         onShowMessage = { viewModel.showStatusMessage(it) },
@@ -1258,7 +1265,7 @@ private fun smartAiThemeName(category: String): String = when (category) {
 private fun smartAiAnimationFor(category: String): String = when (category) {
     "Birthday" -> "Zoom In"
     "Achievement" -> "Fade"
-    "Welcome" -> "Slide Right"
+    "Welcome" -> "Mix Up"
     "Income" -> "Scale"
     "Festival" -> "Pulse"
     "Anniversary" -> "Fade"
@@ -1840,7 +1847,8 @@ private fun VideoMakerModule(
                             personName = "Rahul Sharma",
                             title = defaultVideoTitle(category),
                             wishMessage = aiForTemplate?.finalWishMessage ?: defaultVideoMessage(category),
-                            animationStyle = aiForTemplate?.animationStyle ?: "Fade",
+                            animationStyle = aiForTemplate?.animationStyle
+                                ?: if (category.equals("Welcome", ignoreCase = true)) "Mix Up" else "Fade",
                             musicSelection = music.first,
                             musicResourceName = music.second
                         )
@@ -2631,6 +2639,7 @@ private fun videoColorPresets(): List<VideoColorPreset> {
 }
 
 private fun videoAnimationOptions(): List<String> = listOf(
+    "Mix Up",
     "Fade",
     "Zoom In",
     "Zoom Out",
@@ -2885,6 +2894,17 @@ private fun AnimatedVideoPosterPreview(
     onPhotoAdjustmentChange: (PhotoAdjustment) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val mixUpTransition = rememberInfiniteTransition(label = "mix_up_poster_preview")
+    val mixUpSeconds by mixUpTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "mix_up_poster_preview_seconds"
+    )
+    val mixUpFrame = mixUpFrameAt(mixUpSeconds)
     var kenBurnsExpanded by remember { mutableStateOf(false) }
     LaunchedEffect(videoState.animationStyle) {
         while (videoState.animationStyle == "Ken Burns" || videoState.animationStyle == "Pulse") {
@@ -2903,6 +2923,7 @@ private fun AnimatedVideoPosterPreview(
         targetState = videoState.animationStyle,
         transitionSpec = {
             when (targetState) {
+                "Mix Up" -> fadeIn(tween(1)) togetherWith fadeOut(tween(180))
                 "Zoom", "Zoom In" -> (fadeIn(tween(450)) + scaleIn(initialScale = 0.82f)) togetherWith
                     (fadeOut(tween(300)) + scaleOut(targetScale = 1.12f))
                 "Zoom Out" -> (fadeIn(tween(450)) + scaleIn(initialScale = 1.18f)) togetherWith
@@ -2927,16 +2948,27 @@ private fun AnimatedVideoPosterPreview(
             colorStyle = colorStyle,
             backgroundStyle = backgroundStyle,
             onPhotoAdjustmentChange = onPhotoAdjustmentChange,
-            modifier = modifier.graphicsLayer(
-                scaleX = when (animationStyle) {
-                    "Ken Burns", "Pulse" -> kenBurnsScale
-                    "Flip" -> 0.96f
-                    else -> 1f
-                },
-                scaleY = if (animationStyle == "Ken Burns" || animationStyle == "Pulse") kenBurnsScale else 1f,
-                rotationZ = if (animationStyle == "Rotate") 3.5f else 0f,
-                rotationY = if (animationStyle == "Flip") 18f else 0f
-            )
+            modifier = modifier.graphicsLayer {
+                when (animationStyle) {
+                    "Mix Up" -> {
+                        alpha = mixUpFrame.alpha
+                        scaleX = mixUpFrame.scale
+                        scaleY = mixUpFrame.scale
+                        rotationZ = mixUpFrame.rotation
+                        translationX = mixUpFrame.translationXFraction * size.width
+                        translationY = mixUpFrame.translationYFraction * size.height
+                    }
+                    "Ken Burns", "Pulse" -> {
+                        scaleX = kenBurnsScale
+                        scaleY = kenBurnsScale
+                    }
+                    "Flip" -> {
+                        scaleX = 0.96f
+                        rotationY = 18f
+                    }
+                    "Rotate" -> rotationZ = 3.5f
+                }
+            }
         )
     }
 }
@@ -3726,7 +3758,7 @@ private fun PosterCustomizationScreen(
                         exportPosterBitmapVideoToGallery(
                             context = context,
                             posterBitmap = bitmap,
-                            state = VideoCustomizationState(title = preset.title, animationStyle = "Fade", duration = "15 Seconds"),
+                            state = VideoCustomizationState(title = preset.title, animationStyle = "Mix Up", duration = "15 Seconds"),
                             title = preset.title,
                             onProgress = {}
                         )
@@ -6463,7 +6495,7 @@ private suspend fun viewModelStatusVideoExport(
     exportPosterBitmapVideoToGallery(
         context = context,
         posterBitmap = bitmap,
-        state = VideoCustomizationState(title = title, animationStyle = "Fade", duration = "15 Seconds"),
+        state = VideoCustomizationState(title = title, animationStyle = "Mix Up", duration = "15 Seconds"),
         title = title,
         onProgress = {}
     )
@@ -7373,7 +7405,16 @@ private fun SavedPostersTab(
     }
 
     editingWelcome?.let { poster ->
-        val project = WelcomeProjectStateStore.decode(poster.backgroundImageRes)
+        // Use decodeWithBranding so the saved poster always shows the CURRENT Settings branding.
+        // Branding is never restored from the saved state — it is always injected fresh from profile.
+        val project = WelcomeProjectStateStore.decodeWithBranding(
+            value = poster.backgroundImageRes,
+            companyName = profileSettings.companyName,
+            logoUri = profileSettings.companyLogoUri,
+            website = profileSettings.websiteName,
+            phone = profileSettings.mobileNumber,
+            address = profileSettings.businessAddress
+        )
         if (project != null) {
             WelcomePosterEditor(
                 preset = poster,
@@ -8238,8 +8279,10 @@ private fun ProfileTab(
     onManageTemplates: () -> Unit,
     profileSettings: ProfileSettings,
     onCompanyLogoSelected: (String) -> Unit,
+    onLeaderImageSelected: (String) -> Unit,
     onCompanyNameChange: (String) -> Unit,
     onWebsiteNameChange: (String) -> Unit,
+    onMobileNumberChange: (String) -> Unit,
     onThemeModeChange: (String) -> Unit,
     onNotificationChange: (String, Boolean) -> Unit,
     onShowMessage: (String) -> Unit,
@@ -8266,8 +8309,10 @@ private fun ProfileTab(
             CompanyInformationCard(
                 profileSettings = profileSettings,
                 onCompanyLogoSelected = onCompanyLogoSelected,
+                onLeaderImageSelected = onLeaderImageSelected,
                 onCompanyNameChange = onCompanyNameChange,
-                onWebsiteNameChange = onWebsiteNameChange
+                onWebsiteNameChange = onWebsiteNameChange,
+                onMobileNumberChange = onMobileNumberChange
             )
         }
         item {
@@ -8419,17 +8464,23 @@ private fun ProfileHeaderCard(profileSettings: ProfileSettings) {
 private fun CompanyInformationCard(
     profileSettings: ProfileSettings,
     onCompanyLogoSelected: (String) -> Unit,
+    onLeaderImageSelected: (String) -> Unit,
     onCompanyNameChange: (String) -> Unit,
-    onWebsiteNameChange: (String) -> Unit
+    onWebsiteNameChange: (String) -> Unit,
+    onMobileNumberChange: (String) -> Unit
 ) {
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    val logoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { onCompanyLogoSelected(it.toString()) }
+    }
+    val leaderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { onLeaderImageSelected(it.toString()) }
     }
 
     ProfileSectionCard(
         title = "Company Information",
         icon = Icons.Default.Business
     ) {
+        // --- Company Logo Row ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -8459,11 +8510,11 @@ private fun CompanyInformationCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text("Company Logo Upload", color = appTextPrimary(), fontWeight = FontWeight.Bold)
+                Text("Company Logo", color = appTextPrimary(), fontWeight = FontWeight.Bold)
                 Text("Auto-filled in poster forms", color = appTextMuted(), style = MaterialTheme.typography.bodySmall)
             }
             Button(
-                onClick = { launcher.launch("image/*") },
+                onClick = { logoLauncher.launch("image/*") },
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6D5DF6))
             ) {
@@ -8471,6 +8522,50 @@ private fun CompanyInformationCard(
             }
         }
         Spacer(modifier = Modifier.height(14.dp))
+
+        // --- Leader / Branding Person Image Row ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(68.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.08f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                val leaderUri = profileSettings.leaderImageUri.takeIf { it.isNotBlank() }?.let { Uri.parse(it) }
+                if (leaderUri != null) {
+                    AsyncImage(
+                        model = if (profileSettings.leaderImageUri.startsWith("/")) File(profileSettings.leaderImageUri) else leaderUri,
+                        contentDescription = "Leader Photo",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFFBFA7FF), modifier = Modifier.size(30.dp))
+                }
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text("Leader / Branding Person", color = appTextPrimary(), fontWeight = FontWeight.Bold)
+                Text("Shown in Welcome poster footer", color = appTextMuted(), style = MaterialTheme.typography.bodySmall)
+            }
+            Button(
+                onClick = { leaderLauncher.launch("image/*") },
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6D5DF6))
+            ) {
+                Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(18.dp))
+            }
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+
         PosterTextField(
             value = profileSettings.companyName,
             onValueChange = onCompanyNameChange,
@@ -8481,8 +8576,15 @@ private fun CompanyInformationCard(
         PosterTextField(
             value = profileSettings.websiteName,
             onValueChange = onWebsiteNameChange,
-            label = "Website Name",
+            label = "Website",
             leadingIcon = Icons.Default.Language
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        PosterTextField(
+            value = profileSettings.mobileNumber,
+            onValueChange = onMobileNumberChange,
+            label = "Phone Number",
+            leadingIcon = Icons.Default.Phone
         )
     }
 }

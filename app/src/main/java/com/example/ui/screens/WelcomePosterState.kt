@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.templates.welcomeBrandingConfig
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -52,18 +53,80 @@ internal data class WelcomePosterState(
     val elements: List<WelcomePosterElement> = emptyList()
 )
 
+/**
+ * Element roles that belong exclusively to global Settings branding.
+ * These are NEVER stored in the saved WelcomePosterState and are always
+ * re-injected from the live ProfileSettings when the editor opens.
+ */
+internal val BRANDING_ELEMENT_ROLES = setOf(
+    "companyName", "website", "phoneNumber", "address",
+    "topBrand",    // top-left / top-right company name labels
+    "companyLogo", // logo image element
+    "brandingBar"  // the branding band background shape
+)
+
+/**
+ * Returns a copy of this state with all branding elements removed.
+ * Call this before persisting so saved designs never store stale branding.
+ */
+internal fun WelcomePosterState.stripBrandingElements(): WelcomePosterState =
+    copy(elements = elements.filter { it.role !in BRANDING_ELEMENT_ROLES })
+
+/**
+ * Returns a copy of this state with fresh branding elements built from the
+ * supplied profile values injected at the correct z-layers.
+ * Call this when reopening a saved design so it always shows current branding.
+ */
+internal fun WelcomePosterState.injectBrandingElements(
+    companyName: String,
+    logoUri: String,
+    website: String,
+    phone: String,
+    address: String
+): WelcomePosterState {
+    // Remove any stale branding first, then rebuild using the same factory
+    val withoutBranding = stripBrandingElements()
+    val fresh = newWelcomePosterState(templateId, companyName, logoUri, website, phone, address = address)
+    val brandingOnly = fresh.elements.filter { it.role in BRANDING_ELEMENT_ROLES }
+    return withoutBranding.copy(elements = withoutBranding.elements + brandingOnly)
+}
+
 internal object WelcomeProjectStateStore {
     private const val Prefix = "welcome_editor_v3:"
     private const val LegacyPrefix = "welcome_editor_v2:"
     private val adapter = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
         .adapter(WelcomePosterState::class.java)
 
-    fun encode(state: WelcomePosterState): String = Prefix + adapter.toJson(state)
+    /**
+     * Encodes a WelcomePosterState for persistence.
+     * Branding elements are STRIPPED before encoding so saved designs never
+     * contain stale company/phone/website data.
+     */
+    fun encode(state: WelcomePosterState): String =
+        Prefix + adapter.toJson(state.stripBrandingElements())
+
+    /**
+     * Decodes a saved WelcomePosterState and immediately injects the current
+     * branding from Settings so the editor always shows live values.
+     */
+    fun decodeWithBranding(
+        value: String,
+        companyName: String,
+        logoUri: String,
+        website: String,
+        phone: String,
+        address: String
+    ): WelcomePosterState? = decode(value)?.injectBrandingElements(
+        companyName, logoUri, website, phone, address
+    )
+
+    /** Raw decode without branding injection — for isProject checks only. */
     fun decode(value: String): WelcomePosterState? = when {
         value.startsWith(Prefix) -> value.removePrefix(Prefix)
         value.startsWith(LegacyPrefix) -> value.removePrefix(LegacyPrefix)
         else -> null
     }?.let { runCatching { adapter.fromJson(it) }.getOrNull() }
+
     fun isProject(value: String) = value.startsWith(Prefix) || value.startsWith(LegacyPrefix)
 }
 
@@ -115,6 +178,15 @@ internal fun welcomeTheme(id: String, templateId: Int): WelcomeTheme {
         -210 -> welcomeThemes[10]
         -211 -> welcomeThemes[11]
         -212 -> welcomeThemes[12]
+        // Premium trilogy: choose accent-matching themes
+        -214 -> welcomeThemes[1]   // Purple + Gold: purple_magenta_gold
+        -215 -> welcomeThemes[2]   // Royal Blue + Gold: midnight_sapphire_gold
+        -216 -> welcomeThemes[4]   // Black + Red + Gold: obsidian_black_gold
+        -217 -> welcomeThemes[1]   // Purple Glow: purple_magenta_gold
+        -218 -> welcomeThemes[4]   // Golden Wave: obsidian_black_gold
+        -219 -> welcomeThemes[2]   // Corporate Blue: midnight_sapphire_gold
+        -220 -> welcomeThemes[3]   // Botanical Green: imperial_emerald_gold
+        -221 -> welcomeThemes[7]   // Dynamic Marathi: sunset_navy_gold
         else -> welcomeThemes[1]
     }
 }
@@ -134,10 +206,11 @@ private fun e(
 )
 
 /**
- * Generates the full MLM Welcome poster layers inspired by the reference image.
- * All 12 templates share this high-production hierarchy while taking on distinct themes.
+ * Editable 4:5 counterparts of the twelve ready-made Welcome compositions.  They deliberately
+ * share semantic roles, not coordinates: changing a design changes the composition while the
+ * user's entered content can be copied into the matching roles by the editor workflow.
  */
-private fun referenceWelcomeLayers(
+private fun distinctWelcomeLayers(
     templateId: Int,
     companyName: String,
     logoUri: String,
@@ -147,74 +220,216 @@ private fun referenceWelcomeLayers(
     address: String
 ): List<WelcomePosterElement> {
     val theme = welcomeTheme("template", templateId)
-    val member = memberName.ifBlank { "NEW TEAM MEMBER" }
-    val comp = companyName.ifBlank { "YOUR COMPANY" }
+    val style = when (templateId) {
+        -201 -> 0; -202 -> 1; -203 -> 2; -204 -> 3; -205 -> 4; -206 -> 5
+        -207 -> 6; -208 -> 7; -209 -> 8; -210 -> 9; -211 -> 10; -212 -> 11
+        -214 -> 12  // Purple Gold Premium
+        -215 -> 13  // Royal Blue Corporate
+        -216 -> 14  // Black Red Gold Luxury
+        -217 -> 12  // Purple Glow Welcome
+        -218 -> 14  // Golden Wave Welcome
+        -219 -> 13  // Corporate Blue Wave
+        -220 -> 0   // Botanical Green
+        -221 -> 13  // Dynamic Marathi
+        else -> (-templateId - 201).coerceIn(0, 11)
+    }
+    val member = memberName.ifBlank { "YOUR NAME" }
+    val company = companyName.trim()
     val layers = mutableListOf<WelcomePosterElement>()
 
-    // 1. Master Background Panel & Glow
-    layers += e("backgroundPanel", "shape", 0f, 0f, 1080f, 1350f, role = "background", z = 1, color = theme.panel, locked = true)
-    layers += e("backgroundGlow", "shape", 380f, 220f, 680f, 680f, role = "glow", z = 2, color = theme.glow, shape = "circle", opacity = 0.38f, locked = true)
-
-    // 2. Top Header Brand & Leadership Band
-    layers += e("topBrandBand", "shape", 20f, 20f, 1040f, 135f, role = "shape", z = 3, color = "#00000000", shape = "roundRect", radius = 24f, borderColor = theme.accent, borderWidth = 2f, locked = true)
-
-    // Left Company Logo & Name
-    layers += e("companyLogo", "logo", 34f, 30f, 105f, 90f, role = "companyLogo", z = 10, shape = "roundRect", radius = 14f, borderColor = theme.accent, borderWidth = 2.5f).copy(imageUri = logoUri)
-    layers += e("companyName", "text", 145f, 36f, 260f, 40f, comp, "companyName", 11, theme.text, size = 20f, bold = true, align = "start")
-    layers += e("companyTagline", "text", 147f, 78f, 260f, 24f, "Excellence & Growth", "companyTagline", 11, theme.accent, size = 10f, bold = true, align = "start")
-
-    // 3 Leadership Circles at Top Center
-    listOf(0, 1, 2).forEach { index ->
-        val x = 420f + index * 115f
-        layers += e("leaderPhoto${index + 1}", "photo", x, 28f, 96f, 96f, role = "leaderPhoto${index + 1}", z = 11, shape = "circle", borderColor = theme.accent, borderWidth = 5f)
-        layers += e("leaderName${index + 1}", "text", x - 10f, 126f, 116f, 18f, "LEADER ${index + 1}", "leaderName${index + 1}", 11, theme.text, size = 11f, bold = true)
+    layers += e("backgroundPanel", "shape", 0f, 0f, 1080f, 1350f, role = "background", z = 1, color = theme.bottom, locked = true)
+    layers += e("backgroundGlow", "shape", if (style % 2 == 0) 420f else 20f, 120f, 720f, 720f, role = "glow", z = 2, color = theme.glow, shape = "circle", opacity = .42f, locked = true)
+    if (company.isNotBlank()) {
+        layers += e("topCompanyLeft", "text", 35f, 24f, 330f, 48f, company, "topBrand", 12, theme.text, size = 18f, bold = true, align = "start")
+        // Premium templates (12-14) and original duals show company on both sides
+        if (style in setOf(0, 2, 4, 7, 10, 12, 14)) {
+            layers += e("topCompanyRight", "text", 715f, 24f, 330f, 48f, company, "topBrand", 12, theme.text, size = 18f, bold = true, align = "end")
+        }
     }
 
-    // Right Company Logo
-    layers += e("companyLogoRight", "logo", 940f, 30f, 105f, 90f, role = "companyLogoRight", z = 10, shape = "roundRect", radius = 14f, borderColor = theme.accent, borderWidth = 2.5f).copy(imageUri = logoUri)
+    val photo = when (style) {
+        0 -> floatArrayOf(570f, 150f, 470f, 760f)
+        1 -> floatArrayOf(45f, 250f, 455f, 720f)
+        2 -> floatArrayOf(315f, 300f, 450f, 450f)
+        3 -> floatArrayOf(570f, 190f, 420f, 620f)
+        4 -> floatArrayOf(355f, 330f, 370f, 430f)
+        5 -> floatArrayOf(45f, 145f, 455f, 790f)
+        6 -> floatArrayOf(570f, 145f, 460f, 700f)
+        7 -> floatArrayOf(300f, 300f, 480f, 480f)
+        8 -> floatArrayOf(565f, 135f, 465f, 755f)
+        9 -> floatArrayOf(80f, 350f, 440f, 440f)
+        10 -> floatArrayOf(340f, 320f, 400f, 480f)
+        // Premium templates: large dominant portraits
+        12 -> floatArrayOf(600f, 148f, 448f, 740f)  // Purple Gold: right side
+        13 -> floatArrayOf(32f, 155f, 466f, 755f)   // Royal Blue: left side
+        14 -> floatArrayOf(598f, 148f, 450f, 740f)  // Black Red: right side
+        else -> floatArrayOf(555f, 90f, 490f, 800f)
+    }
+    val photoShape = when (style) { 2, 4, 7, 9 -> "circle"; 12, 13, 14 -> "roundRect"; else -> "roundRect" }
+    layers += e("memberFrame", "shape", photo[0] - 12f, photo[1] - 12f, photo[2] + 24f, photo[3] + 24f, role = "portraitFrame", z = 4, color = "#00000000", shape = photoShape, radius = 44f, borderColor = theme.accent, borderWidth = 5f, locked = true)
+    layers += e("memberPhoto", "photo", photo[0], photo[1], photo[2], photo[3], role = "memberPhoto", z = 8, shape = photoShape, radius = 38f)
 
-    // 3. Main 3D Gold Welcome Headings
-    layers += e("welcomeHeadline", "text", 25f, 160f, 570f, 140f, "WELCOME", "welcomeHeadline", 12, theme.accent, size = 96f, bold = true, align = "start", shadow = true)
-    layers += e("toSubheading", "text", 210f, 282f, 160f, 48f, "To", "toSubheading", 12, theme.accent, size = 42f, bold = true, italic = true)
+    val titleBox = when (style) {
+        0, 6, 8 -> floatArrayOf(35f, 120f, 520f, 130f)
+        1, 5 -> floatArrayOf(545f, 135f, 490f, 125f)
+        2, 4, 7, 9, 10 -> floatArrayOf(100f, 115f, 880f, 125f)
+        3, 11 -> floatArrayOf(50f, 145f, 500f, 125f)
+        12, 14 -> floatArrayOf(22f, 118f, 560f, 147f)  // Purple Gold / Black Red: large left
+        13 -> floatArrayOf(505f, 140f, 540f, 130f)      // Royal Blue: headline right
+        else -> floatArrayOf(70f, 130f, 850f, 125f)
+    }
+    layers += e("welcomeHeadline", "text", titleBox[0], titleBox[1], titleBox[2], titleBox[3], "WELCOME", "welcomeHeadline", 12, theme.accent, size = if (style in setOf(2, 4, 7, 9, 10)) 88f else if (style in setOf(12, 14)) 102f else 78f, bold = true, align = if (style in setOf(2, 4, 7, 9, 10, 13)) "center" else "start", shadow = style != 11)
 
-    // 4. Member Nameplate White Banner Ribbon
-    layers += e("nameRibbon", "shape", 12f, 345f, 600f, 122f, role = "decorativeRibbon", z = 10, color = "#FFFFFF", shape = "ribbon", borderColor = theme.accent, borderWidth = 4f, locked = true)
-    layers += e("memberName", "text", 45f, 366f, 535f, 44f, member, "memberName", 12, "#111111", size = 32f, bold = true)
-    layers += e("designation", "text", 65f, 412f, 495f, 30f, "SOFTWARE DEVELOPERS", "memberDesignation", 12, "#242424", size = 18f, bold = true)
+    val subtitle = when (style) {
+        3 -> "YOU ARE WELCOME HERE"
+        5 -> "GROW WITH PURPOSE"
+        6 -> "SUCCESS STARTS TOGETHER"
+        9 -> "WITH WARMTH AND JOY"
+        10 -> "हार्दिक स्वागत"
+        11 -> "TO THE NEXT CHAPTER"
+        12 -> "TO"
+        13 -> "TO OUR TEAM"
+        14 -> "TO OUR FAMILY"
+        else -> "TO OUR TEAM"
+    }
+    layers += e("toSubheading", "text", titleBox[0] + 5f, titleBox[1] + titleBox[3], titleBox[2], 48f, subtitle, "subtitle", 12, theme.text, size = 24f, bold = true, align = if (style in setOf(2, 4, 7, 9, 10, 13)) "center" else "start")
 
-    // 5. 3D Gold Platform Heading
-    layers += e("platformLine", "text", 30f, 485f, 555f, 140f, "IN OUR GREAT\nPLATFORM", "welcomeMessage", 12, theme.accent, size = 52f, bold = true, align = "start", shadow = true)
+    val campaignCopy = listOf(
+        "IN OUR GREAT" to "PLATFORM",
+        "JOIN OUR" to "GREAT TEAM",
+        "GROW WITH" to "THE BEST",
+        "CREATE. LEAD." to "SUCCEED TOGETHER",
+        "DREAM BIG" to "WIN TOGETHER",
+        "BUILD THE" to "FUTURE",
+        "YOUR NEXT" to "BIG WIN",
+        "PREMIUM PEOPLE" to "PREMIUM FUTURE",
+        "FRESH IDEAS" to "BOLD VISION",
+        "BLOOM WITH" to "POSSIBILITY",
+        "A PROUD" to "NEW STORY",
+        "GREAT PEOPLE" to "GREAT FUTURE",
+        // Premium trilogy campaign copy
+        "IN OUR GREAT" to "FAMILY",       // style 12: Purple Gold
+        "JOIN OUR" to "GREAT TEAM",       // style 13: Royal Blue
+        "DREAM BIG" to "WIN TOGETHER"     // style 14: Black Red
+    )[style]
+    val campaignBox = when (style) {
+        0, 6, 8 -> floatArrayOf(35f, 300f, 520f, 54f, 35f, 355f, 520f, 68f)
+        1, 5 -> floatArrayOf(535f, 300f, 505f, 54f, 535f, 355f, 505f, 68f)
+        2, 4, 7, 10 -> floatArrayOf(135f, 1055f, 810f, 38f, 135f, 1090f, 810f, 38f)
+        3, 11 -> floatArrayOf(45f, 330f, 475f, 54f, 45f, 385f, 475f, 66f)
+        9 -> floatArrayOf(535f, 330f, 500f, 54f, 535f, 385f, 500f, 66f)
+        12, 14 -> floatArrayOf(30f, 478f, 540f, 62f, 22f, 540f, 560f, 80f)  // Left side
+        13 -> floatArrayOf(508f, 475f, 527f, 62f, 502f, 540f, 538f, 76f)    // Right side
+        else -> floatArrayOf(45f, 300f, 480f, 62f, 45f, 360f, 480f, 72f)
+    }
+    val compactCampaign = style in setOf(2, 4, 7, 10)
+    val campaignTopSize = if (compactCampaign) 27f else if (style in setOf(12, 14)) 55f else if (style == 13) 54f else if (campaignCopy.first.length > 13) 37f else 45f
+    val campaignBottomSize = when {
+        compactCampaign -> 29f
+        style in setOf(12, 14) -> 78f
+        style == 13 -> 65f
+        campaignCopy.second.length > 15 -> 38f
+        campaignCopy.second.length > 12 -> 45f
+        else -> 55f
+    }
+    layers += e(
+        "campaignTop", "text", campaignBox[0], campaignBox[1], campaignBox[2], campaignBox[3],
+        campaignCopy.first, "campaignTop", 12, theme.accent,
+        size = campaignTopSize, bold = true, shadow = true
+    )
+    layers += e(
+        "campaignBottom", "text", campaignBox[4], campaignBox[5], campaignBox[6], campaignBox[7],
+        campaignCopy.second, "campaignBottom", 12, theme.accent,
+        size = campaignBottomSize, bold = true, shadow = true
+    )
 
-    // 6. Right Side Welcomed Member Photo
-    layers += e("memberFrame", "shape", 585f, 175f, 470f, 580f, role = "shape", z = 3, color = "#00000000", shape = "roundRect", radius = 48f, borderColor = theme.accent, borderWidth = 6f, locked = true)
-    layers += e("memberPhoto", "photo", 600f, 190f, 440f, 550f, role = "memberPhoto", z = 9, shape = "roundRect", radius = 40f)
+    val ribbonBox = when (style) {
+        0, 6, 8 -> floatArrayOf(20f, 455f, 560f, 145f)
+        1, 5 -> floatArrayOf(530f, 455f, 530f, 145f)
+        2, 4, 7, 10 -> floatArrayOf(120f, 790f, 840f, 145f)
+        3, 9, 11 -> floatArrayOf(525f, 840f, 520f, 145f)
+        12 -> floatArrayOf(14f, 322f, 576f, 143f)   // Left ribbon for Purple Gold
+        13 -> floatArrayOf(472f, 328f, 590f, 130f)      // Right ribbon for Royal Blue
+        14 -> floatArrayOf(14f, 330f, 576f, 143f)       // Left ribbon for Black Red (offset from 12)
+        else -> floatArrayOf(45f, 430f, 500f, 145f)
+    }
+    // Premium templates use white ribbon (12=Purple Gold) or gold (13=Blue) or red (14=Black Red)
+    val ribbonFillColor = when (style) {
+        12 -> "#FFFFFF"
+        13 -> theme.accent
+        14 -> theme.ribbonColor
+        else -> if (style in setOf(0, 1, 2, 4, 6, 8, 10)) "#FFFFFF" else theme.ribbonColor
+    }
+    layers += e("nameRibbon", "shape", ribbonBox[0], ribbonBox[1], ribbonBox[2], ribbonBox[3], role = "nameRibbon", z = 10, color = ribbonFillColor, shape = "ribbon", borderColor = theme.accent, borderWidth = 4f)
+    val ribbonTextColor = when (style) {
+        12 -> "#1A0030"
+        13 -> "#040F1E"
+        14 -> "#FFFFFF"
+        else -> if (style in setOf(0, 1, 2, 4, 6, 8, 10)) "#151018" else "#FFFFFF"
+    }
+    layers += e("memberName", "text", ribbonBox[0] + 40f, ribbonBox[1] + 18f, ribbonBox[2] - 80f, 52f, member, "memberName", 12, ribbonTextColor, size = 34f, bold = true)
+    layers += e("designation", "text", ribbonBox[0] + 50f, ribbonBox[1] + 76f, ribbonBox[2] - 100f, 34f, "YOUR ROLE", "memberDesignation", 12, if (ribbonTextColor == "#FFFFFF") theme.accent else "#5A3A18", size = 18f, bold = true)
 
-    // 7. Slogan Ribbon under Member Photo (Red Slogan Ribbon)
-    layers += e("decorativeRibbon", "shape", 565f, 765f, 495f, 76f, role = "decorativeRibbon", z = 11, color = theme.ribbonColor, shape = "ribbon", borderColor = theme.ribbonBorder, borderWidth = 3f, locked = true)
-    layers += e("sloganText", "text", 585f, 782f, 455f, 42f, theme.sloganText, "sloganText", 12, "#FFFFFF", size = 26f, bold = true)
+    val messageBox = when (style) {
+        0, 6, 8 -> floatArrayOf(45f, 640f, 490f, 165f)
+        1, 5 -> floatArrayOf(545f, 640f, 480f, 160f)
+        2, 4, 7, 10 -> floatArrayOf(145f, 965f, 790f, 105f)
+        3, 11 -> floatArrayOf(55f, 570f, 460f, 170f)
+        9 -> floatArrayOf(560f, 575f, 455f, 165f)
+        12 -> floatArrayOf(550f, 840f, 490f, 80f)   // Purple Gold: below portrait right
+        13 -> floatArrayOf(528f, 685f, 487f, 110f)  // Royal Blue: message right
+        14 -> floatArrayOf(50f, 730f, 520f, 95f)    // Black Red: message left
+        else -> floatArrayOf(55f, 625f, 470f, 160f)
+    }
+    layers += e("welcomeMessage", "text", messageBox[0], messageBox[1], messageBox[2], messageBox[3], "We are delighted to welcome you.\nTogether, we will achieve remarkable things.", "welcomeMessage", 11, theme.text, size = 23f, align = "start")
 
-    // 8. Quote Marks and Inspiring Hindi Quote
-    layers += e("quoteMarks", "text", 760f, 845f, 80f, 48f, "””", "quoteMarks", 12, theme.accent, size = 52f, bold = true)
-    layers += e("quote", "text", 505f, 895f, 555f, 92f, theme.hindiQuote, "quote", 12, theme.text, size = 19f, bold = true, align = "center")
+    // Supporting portraits: optional secondary photo (bottom-left) for premium templates and a few originals.
+    // A blank image URI leaves no placeholder artwork behind.
+    if (style in setOf(0, 2, 8, 12, 14)) {
+        val supX = when (style) { 2 -> 190f; 12, 14 -> 28f; else -> 480f }
+        val supY = when (style) { 2 -> 385f; 12, 14 -> 880f; else -> 820f }
+        val supSize = if (style in setOf(12, 14)) 135f else 125f
+        layers += e("supportPhoto", "photo", supX, supY, supSize, supSize, role = "supportPhoto", z = 9, shape = "circle", borderColor = theme.accent, borderWidth = 4f)
+    }
 
-    // 9. Host / Team Leader Section (Bottom Left)
-    layers += e("hostHalo", "shape", 18f, 885f, 292f, 312f, role = "shape", z = 4, color = "#00000000", shape = "roundRect", radius = 38f, borderColor = theme.accent, borderWidth = 4f, locked = true)
-    layers += e("hostPhoto", "photo", 30f, 897f, 268f, 288f, role = "hostPhoto", z = 9, shape = "roundRect", radius = 30f, borderColor = theme.accent, borderWidth = 3f)
-    layers += e("hostName", "text", 335f, 920f, 420f, 46f, "TEAM LEADER", "hostName", 12, theme.text, size = 32f, bold = true, align = "start")
-    layers += e("hostDesignation", "text", 338f, 968f, 420f, 32f, "SENIOR PARTNER", "hostDesignation", 12, theme.accent, size = 18f, bold = true, align = "start")
-    layers += e("hostCompany", "text", 338f, 1002f, 420f, 28f, comp, "hostCompany", 12, theme.text, size = 17f, align = "start")
-    layers += e("trophyIcon", "icon", 400f, 1045f, 80f, 80f, "🏆", "trophyIcon", 12, theme.accent, size = 58f, bold = true)
-    layers += e("companyLogoBottom", "logo", 335f, 1045f, 68f, 68f, role = "companyLogo", z = 10, shape = "roundRect", radius = 12f, borderColor = theme.accent, borderWidth = 2f).copy(imageUri = logoUri)
-
-    // 10. Bottom White Curve & Contact CTA Pill
-    layers += e("bottomCurve", "shape", 270f, 1135f, 810f, 215f, role = "shape", z = 6, color = "#FFFFFF", shape = "roundRect", radius = 80f, locked = true)
-    layers += e("contactPanel", "shape", 705f, 1175f, 355f, 90f, role = "contactInformation", z = 8, color = "#0A0D14", shape = "roundRect", radius = 45f, borderColor = theme.accent, borderWidth = 2.5f, locked = true)
-    layers += e("phoneNumber", "text", 720f, 1187f, 325f, 26f, "FOR SUCCESS CALL ON", "phoneNumber", 12, theme.accent, size = 14f, bold = true, align = "center")
-    layers += e("whatsAppNumber", "text", 720f, 1215f, 325f, 40f, phone.ifBlank { "+91 XXXXX XXXXX" }, "WhatsAppNumber", 12, "#FFFFFF", size = 26f, bold = true, align = "center")
-    layers += e("website", "text", 320f, 1285f, 420f, 28f, website.ifBlank { "www.yourcompany.com" }, "website", 12, "#1A1A1A", size = 16f, bold = true, align = "start")
-    layers += e("address", "text", 715f, 1285f, 340f, 28f, address.ifBlank { "Maharashtra, India" }, "address", 12, "#1A1A1A", size = 15f, align = "end")
-    layers += e("successTagline", "text", 20f, 1315f, 1040f, 28f, "SAME VISION  |  SAME TEAM  |  BRIGHTER TOMORROW", "successTagline", 12, theme.accent, size = 16f, bold = true, align = "center")
-
+    // --- Branding Band (template-config driven, collision-free) ---
+    val bc = welcomeBrandingConfig(style, logoUri.isNotBlank())
+    layers += e("brandingBand", "shape", bc.bandX, bc.bandY, bc.bandWidth, bc.bandHeight,
+        role = "brandingBar", z = 5, color = theme.panel, shape = "roundRect",
+        radius = bc.bandRadius, borderColor = theme.accent, borderWidth = 2f, locked = true)
+    // Logo (only when user has a logo URI)
+    if (logoUri.isNotBlank()) {
+        val lc = bc.logo
+        layers += e("companyLogo", "logo", lc.x, lc.y, lc.width, lc.height,
+            role = "companyLogo", z = 10, shape = lc.shape, radius = lc.cornerRadius)
+            .copy(imageUri = logoUri)
+    }
+    // Company name (left column, auto-sizes in renderer, hidden when blank)
+    if (company.isNotBlank()) {
+        val cc = bc.companyName
+        layers += e("companyName", "text", cc.x, cc.y, cc.width, cc.height,
+            company, "companyName", 11, theme.text, size = cc.fontSize, bold = true, align = cc.alignment)
+    }
+    // Website (left column row 2, only shown when user has set a website)
+    if (website.isNotBlank()) {
+        val wc = bc.website
+        layers += e("website", "text", wc.x, wc.y, wc.width, wc.height,
+            website, "website", 11, theme.accent, size = wc.fontSize, align = wc.alignment)
+    }
+    // Phone number (right column, only shown when user has set a phone)
+    if (phone.isNotBlank()) {
+        val pc = bc.phone
+        layers += e("phoneNumber", "text", pc.x, pc.y, pc.width, pc.height,
+            phone, "phoneNumber", 11, theme.text, size = pc.fontSize, bold = true, align = pc.alignment)
+    }
+    // Address (right column row 2, only shown when set)
+    if (address.isNotBlank()) {
+        val ac = bc.address
+        if (ac != null) {
+            layers += e("address", "text", ac.x, ac.y, ac.width, ac.height,
+                address, "address", 11, theme.accent, size = ac.fontSize, align = ac.alignment)
+        }
+    }
     return layers
 }
 
@@ -229,7 +444,7 @@ internal fun newWelcomePosterState(
 ): WelcomePosterState {
     return WelcomePosterState(
         templateId = templateId,
-        elements = referenceWelcomeLayers(templateId, companyName, logoUri, website, phone, memberName, address)
+        elements = distinctWelcomeLayers(templateId, companyName, logoUri, website, phone, memberName, address)
     )
 }
 

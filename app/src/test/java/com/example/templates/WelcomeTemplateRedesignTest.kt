@@ -17,47 +17,52 @@ import org.robolectric.annotation.GraphicsMode
 class WelcomeTemplateRedesignTest {
 
     private val expectedNames = listOf(
-        "Royal Gold Welcome",
-        "Corporate Blue Welcome",
-        "Premium Purple Welcome",
-        "Elegant White & Gold Welcome",
-        "Red Celebration Welcome",
         "Modern Green Welcome",
-        "Orange Success Welcome",
-        "Luxury Black Welcome",
-        "Fresh Gradient Welcome",
-        "Floral Welcome",
-        "Indian Traditional Welcome",
-        "Minimal Professional Welcome"
+        "Ocean Cyan Welcome",
+        "Royal Blue Corporate Welcome",
+        "Purple Gold Premium Welcome",
+        "Purple Glow Welcome",
+        "Golden Wave Welcome",
+        "Corporate Blue Wave Welcome",
+        "Botanical Green Welcome",
+        "Dynamic Marathi Welcome"
     )
 
-    private val expectedStyles = (130..141).toList()
+    private val expectedStyles = listOf(141, 142, 144, 143, 147, 148, 149, 150, 151)
+    private val expectedIds = listOf(-201, -202, -215, -214, -217, -218, -219, -220, -221)
 
     @Test
-    fun allTwelveWelcomeTemplatesExistWithExactNamesAndStyles() {
+    fun allWelcomeTemplatesExistWithExactNamesAndStyles() {
         val welcomeTemplates = StarterTemplates.all.filter { it.category == "Welcome" }
-        assertEquals("Must contain exactly 12 Welcome templates", 12, welcomeTemplates.size)
+        assertEquals("Must contain 9 Welcome templates", 9, welcomeTemplates.size)
 
         val actualNames = welcomeTemplates.map { it.name }
-        assertEquals("Template names must match the 12 required designs", expectedNames, actualNames)
+        assertEquals("Template names must match the required designs", expectedNames, actualNames)
 
         val actualStyles = welcomeTemplates.map { it.style }
-        assertEquals("Styles must map to 130..141", expectedStyles, actualStyles)
+        assertEquals("Styles must map correctly", expectedStyles, actualStyles)
 
         val actualIds = welcomeTemplates.map { it.id }
-        assertEquals("IDs must be -201 to -212", (-201 downTo -212).toList(), actualIds)
+        assertEquals("IDs must map correctly", expectedIds, actualIds)
     }
 
     @Test
     fun eachWelcomeTemplateHasUniqueCompositionAndDistinctPalette() {
         val welcomeTemplates = StarterTemplates.all.filter { it.category == "Welcome" }
 
-        // Unique base colors or distinct combinations
         val styles = welcomeTemplates.map { it.style }.toSet()
-        assertEquals("All 12 templates must have unique styles", 12, styles.size)
+        assertEquals("All 9 templates must have unique styles", 9, styles.size)
 
         val names = welcomeTemplates.map { it.name }.toSet()
-        assertEquals("All 12 templates must have unique names", 12, names.size)
+        assertEquals("All 9 templates must have unique names", 9, names.size)
+
+        // All 4 templates expose exactly the 3 dynamic fields: Photo, Name, Designation
+        for (template in welcomeTemplates) {
+            assertEquals(
+                listOf(TemplateField.PHOTO, TemplateField.NAME, TemplateField.DESIGNATION),
+                template.visibleFields
+            )
+        }
     }
 
     @Test
@@ -86,9 +91,9 @@ class WelcomeTemplateRedesignTest {
     @Test
     fun welcomeTemplateRegistryProvidesLookupAndConversions() {
         val registryTemplates = WelcomeTemplateRegistry.templates
-        assertEquals(12, registryTemplates.size)
+        assertEquals(9, registryTemplates.size)
 
-        for (id in -201 downTo -212) {
+        for (id in expectedIds) {
             val template = WelcomeTemplateRegistry.getTemplateById(id)
             assertNotNull("Template $id must be found in registry", template)
         }
@@ -117,7 +122,7 @@ class WelcomeTemplateRedesignTest {
             guestPhoto = ""
         )
 
-        assertEquals("Royal Gold Welcome", data.templateName)
+        assertEquals("Modern Green Welcome", data.templateName)
         assertEquals("Amit Patel", data.guestName)
         assertEquals("Senior Vice President", data.guestDesignation)
         assertEquals("Dr. Rajesh Sharma", data.userName)
@@ -136,7 +141,7 @@ class WelcomeTemplateRedesignTest {
     }
 
     @Test
-    fun templateRendererRendersAllTwelveWelcomeTemplatesAtFullResolution() {
+    fun templateRendererRendersAllFifteenWelcomeTemplatesAtFullResolution() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val welcomeTemplates = StarterTemplates.all.filter { it.category == "Welcome" }
 
@@ -172,7 +177,7 @@ class WelcomeTemplateRedesignTest {
     @Test
     fun templateRendererSupportsHindiAndMarathiDevanagariUnicodeText() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val traditionalTemplate = StarterTemplates.all.first { it.id == -211 }
+        val traditionalTemplate = StarterTemplates.all.first { it.category == "Welcome" }
 
         val hindiMarathiDesign = GeneratedPoster(
             template = traditionalTemplate,
@@ -212,6 +217,87 @@ class WelcomeTemplateRedesignTest {
 
         val bitmap = TemplateRenderer.render(context, design, 1080)
         assertNotNull("Must render cleanly even with empty branding", bitmap)
+        assertEquals(1080, bitmap.width)
+        assertEquals(1080, bitmap.height)
+    }
+
+    @Test
+    fun style143KeepsItsExistingIdentityAndEditableContract() {
+        val template = StarterTemplates.all.single { it.id == -214 }
+
+        assertEquals("Welcome", template.category)
+        assertEquals(143, template.style)
+        assertEquals(1080, template.canvasWidth)
+        assertEquals(1080, template.canvasHeight)
+        assertEquals(
+            listOf(
+                TemplateField.PHOTO,
+                TemplateField.NAME,
+                TemplateField.DESIGNATION
+            ),
+            template.visibleFields
+        )
+    }
+
+    @Test
+    fun style143SavedDesignRoundTripPreservesTextPhotoCropBrandingAndTemplateIdentity() {
+        val template = StarterTemplates.all.single { it.id == -214 }
+        val original = GeneratedPoster(
+            template = template,
+            values = mapOf(
+                TemplateField.NAME.name to "Aarav Mehta",
+                TemplateField.DESIGNATION.name to "Product Designer",
+                TemplateField.QUOTE.name to "Together We Grow",
+                TemplateField.MESSAGE.name to "Welcome to a new chapter of shared success."
+            ),
+            photo = "/private/template_assets/member-transparent.png",
+            originalPhoto = "/private/template_assets/member.jpg",
+            backgroundRemovedPhoto = "/private/template_assets/member-transparent.png",
+            backgroundRemoved = true,
+            crop = PhotoCrop(scale = 2.2f, panX = .35f, panY = -.2f),
+            branding = BusinessBranding(
+                logo = "/private/template_assets/logo.png",
+                company = "Northstar Studio",
+                phone = "+91 90000 00000",
+                website = "northstar.example",
+                profilePhoto = "/private/template_assets/leader.png",
+                ownerName = "Mira Shah",
+                ownerDesignation = "Team Leader"
+            )
+        )
+
+        val restored = TemplateJson.design(TemplateJson.encodeDesign(original))
+        assertNotNull(restored)
+        restored!!
+        assertEquals(-214, restored.template.id)
+        assertEquals(143, restored.template.style)
+        assertEquals(original.values, restored.values)
+        assertEquals(original.photo, restored.photo)
+        assertEquals(original.originalPhoto, restored.originalPhoto)
+        assertEquals(original.backgroundRemovedPhoto, restored.backgroundRemovedPhoto)
+        assertTrue(restored.backgroundRemoved)
+        assertEquals(original.crop.scale, restored.crop.scale, .001f)
+        assertEquals(original.crop.panX, restored.crop.panX, .001f)
+        assertEquals(original.crop.panY, restored.crop.panY, .001f)
+        assertEquals(original.branding, restored.branding)
+    }
+
+    @Test
+    fun style143RendersAtExportResolutionWithEmptyOptionalBranding() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val template = StarterTemplates.all.single { it.id == -214 }
+        val design = GeneratedPoster(
+            template = template,
+            values = mapOf(
+                TemplateField.NAME.name to "NEW MEMBER",
+                TemplateField.QUOTE.name to "WELCOME ABOARD",
+                TemplateField.MESSAGE.name to "We are glad to have you with us."
+            ),
+            photo = "res:sample_business_woman",
+            branding = BusinessBranding()
+        )
+
+        val bitmap = TemplateRenderer.render(context, design, 1080)
         assertEquals(1080, bitmap.width)
         assertEquals(1080, bitmap.height)
     }

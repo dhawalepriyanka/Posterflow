@@ -30,9 +30,9 @@ class TemplateWorkflowTest {
 
     @Test fun allThirtyStartersUseOneValidatedSquareModel() {
         val all=StarterTemplates.all
-        assertEquals(94,all.size)
-        assertEquals(94,all.map{it.id}.distinct().size)
-        assertEquals(mapOf("Welcome" to 12,"Birthday" to 13,"Achievement" to 6,"Income" to 6,"Festival" to 8,"Motivation" to 9,"Business" to 3,"Good Morning" to 3,"Good Night" to 3,"Anniversary" to 3,"Offers" to 2,"Events" to 2,"Political" to 3,"Real Estate" to 3,"Restaurant" to 3,"Healthcare" to 3,"Education" to 3,"Job Vacancy" to 3,"Quotes" to 3,"Devotional" to 3),all.groupingBy{it.category}.eachCount())
+        assertEquals(86,all.size)
+        assertEquals(86,all.map{it.id}.distinct().size)
+        assertEquals(mapOf("Welcome" to 4,"Birthday" to 13,"Achievement" to 6,"Income" to 6,"Festival" to 8,"Motivation" to 9,"Business" to 3,"Good Morning" to 3,"Good Night" to 3,"Anniversary" to 3,"Offers" to 2,"Events" to 2,"Political" to 3,"Real Estate" to 3,"Restaurant" to 3,"Healthcare" to 3,"Education" to 3,"Job Vacancy" to 3,"Quotes" to 3,"Devotional" to 3),all.groupingBy{it.category}.eachCount())
         all.forEach{assertNull("${it.name}: ${it.validationError()}",it.validationError());assertEquals(1080,it.canvasWidth);assertEquals(it,TemplateJson.template(it.asPoster().backgroundImageRes))}
     }
 

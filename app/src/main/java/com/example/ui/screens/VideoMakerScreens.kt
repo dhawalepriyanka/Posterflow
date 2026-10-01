@@ -36,6 +36,11 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -164,6 +169,49 @@ internal data class VideoCustomizationState(
     val musicStartSecond: Int = 0,
     val duration: String = "15 Seconds"
 )
+
+/** One deterministic frame of the combined Welcome motion used by preview and export. */
+internal data class MixUpFrame(
+    val alpha: Float,
+    val scale: Float,
+    val rotation: Float,
+    val translationXFraction: Float,
+    val translationYFraction: Float
+)
+
+internal fun mixUpFrameAt(seconds: Float): MixUpFrame {
+    fun smooth(value: Float): Float {
+        val t = value.coerceIn(0f, 1f)
+        return t * t * (3f - 2f * t)
+    }
+    fun lerp(start: Float, end: Float, amount: Float) = start + (end - start) * amount
+
+    val intro = smooth(seconds / 0.72f)
+    val settle = smooth((seconds - 0.72f) / 0.72f)
+    val isEntering = seconds < 0.72f
+    val isSettling = seconds < 1.44f
+    val scale = when {
+        isEntering -> lerp(0.82f, 0.94f, intro)
+        isSettling -> lerp(0.94f, 1f, settle)
+        else -> 1f + 0.012f * kotlin.math.sin((seconds - 1.44f) * 2.35f)
+    }
+    val rotation = when {
+        isEntering -> lerp(-6.5f, 2.2f, intro)
+        isSettling -> lerp(2.2f, 0f, settle)
+        else -> 0.35f * kotlin.math.sin((seconds - 1.44f) * 1.8f)
+    }
+    val x = when {
+        isEntering -> lerp(0.07f, -0.018f, intro)
+        isSettling -> lerp(-0.018f, 0f, settle)
+        else -> 0.004f * kotlin.math.sin((seconds - 1.44f) * 1.55f)
+    }
+    val y = when {
+        isEntering -> lerp(0.055f, -0.012f, intro)
+        isSettling -> lerp(-0.012f, 0f, settle)
+        else -> 0.003f * kotlin.math.sin((seconds - 1.44f) * 1.25f)
+    }
+    return MixUpFrame(alpha = intro, scale = scale, rotation = rotation, translationXFraction = x, translationYFraction = y)
+}
 
 internal fun defaultVideoTitle(category: String): String = when (category) {
     "Birthday" -> "Happy Birthday"
@@ -383,7 +431,7 @@ internal fun VideoCustomizationScreen(
     if (showAnimationSheet) {
         VideoOptionSheet(
             title = "Animation Style",
-            options = listOf("Fade", "Zoom", "Slide", "Scale", "Pop", "Ken Burns"),
+            options = listOf("Mix Up", "Fade", "Zoom", "Slide", "Scale", "Pop", "Ken Burns"),
             selected = state.animationStyle,
             onDismiss = { showAnimationSheet = false },
             onSelected = {
@@ -570,6 +618,17 @@ private fun AnimatedVideoPreview(
     colors: List<Color>,
     category: String
 ) {
+    val mixUpTransition = rememberInfiniteTransition(label = "mix_up_preview")
+    val mixUpSeconds by mixUpTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "mix_up_preview_seconds"
+    )
+    val mixUpFrame = mixUpFrameAt(mixUpSeconds)
     var kenBurnsExpanded by remember { mutableStateOf(false) }
     LaunchedEffect(state.animationStyle) {
         while (state.animationStyle == "Ken Burns") {
@@ -604,6 +663,7 @@ private fun AnimatedVideoPreview(
                 targetState = state,
                 transitionSpec = {
                     when (targetState.animationStyle) {
+                        "Mix Up" -> fadeIn(tween(1)) togetherWith fadeOut(tween(180))
                         "Zoom" -> (fadeIn(tween(450)) + scaleIn(initialScale = 0.82f)) togetherWith
                             (fadeOut(tween(300)) + scaleOut(targetScale = 1.12f))
                         "Slide" -> slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
@@ -619,10 +679,22 @@ private fun AnimatedVideoPreview(
                     state = previewState,
                     colors = colors,
                     category = category,
-                    modifier = Modifier.graphicsLayer(
-                        scaleX = if (previewState.animationStyle == "Ken Burns") kenBurnsScale else 1f,
-                        scaleY = if (previewState.animationStyle == "Ken Burns") kenBurnsScale else 1f
-                    )
+                    modifier = Modifier.graphicsLayer {
+                        when (previewState.animationStyle) {
+                            "Mix Up" -> {
+                                alpha = mixUpFrame.alpha
+                                scaleX = mixUpFrame.scale
+                                scaleY = mixUpFrame.scale
+                                rotationZ = mixUpFrame.rotation
+                                translationX = mixUpFrame.translationXFraction * size.width
+                                translationY = mixUpFrame.translationYFraction * size.height
+                            }
+                            "Ken Burns" -> {
+                                scaleX = kenBurnsScale
+                                scaleY = kenBurnsScale
+                            }
+                        }
+                    }
                 )
             }
         }
@@ -2143,12 +2215,22 @@ private fun applyExportAnimationTransform(
     val progress = (seconds / 1.2f).coerceIn(0f, 1f)
     val centerX = width / 2f
     val centerY = height / 2f
+    val mixUpFrame = mixUpFrameAt(seconds)
     val alpha = when (animationStyle) {
         "Fade" -> (progress * 255).toInt().coerceIn(0, 255)
+        "Mix Up" -> (mixUpFrame.alpha * 255f).toInt().coerceIn(0, 255)
         else -> 255
     }
     val saveCount = canvas.saveLayerAlpha(0f, 0f, width.toFloat(), height.toFloat(), alpha)
     when (animationStyle) {
+        "Mix Up" -> {
+            canvas.translate(
+                mixUpFrame.translationXFraction * width,
+                mixUpFrame.translationYFraction * height
+            )
+            canvas.rotate(mixUpFrame.rotation, centerX, centerY)
+            canvas.scale(mixUpFrame.scale, mixUpFrame.scale, centerX, centerY)
+        }
         "Zoom In", "Zoom" -> {
             val scale = 0.82f + 0.18f * progress
             canvas.scale(scale, scale, centerX, centerY)

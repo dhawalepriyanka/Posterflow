@@ -153,6 +153,9 @@ internal fun WelcomePosterEditor(
     onCreateVideo: (Bitmap) -> Unit = {}
 ) {
     val context = LocalContext.current
+    // For new posters, re-create when branding changes. For reopened posters, savedState is
+    // already injected with live branding by decodeWithBranding before arriving here.
+    val brandingKey = Triple(profile.companyName, profile.companyLogoUri, profile.mobileNumber)
     val original = remember(preset.id, savedState) {
         savedState ?: newWelcomePosterState(
             preset.id, profile.companyName, profile.companyLogoUri, profile.websiteName,
@@ -168,6 +171,21 @@ internal fun WelcomePosterEditor(
     var pendingImageId by remember { mutableStateOf<String?>(null) }
     val latestState by rememberUpdatedState(state)
     val assets = remember(state.elements) { loadWelcomeRenderAssets(context, state) }
+
+    // ─── LIVE BRANDING SYNC ────────────────────────────────────────────────────
+    // Whenever the user updates Settings branding (company name, logo, phone,
+    // website, address), re-inject fresh branding into the current editor state
+    // WITHOUT touching user-specific elements (photo, name, role).
+    LaunchedEffect(brandingKey, profile.websiteName, profile.businessAddress) {
+        state = state.injectBrandingElements(
+            companyName = profile.companyName,
+            logoUri     = profile.companyLogoUri,
+            website     = profile.websiteName,
+            phone       = profile.mobileNumber,
+            address     = profile.businessAddress
+        )
+    }
+    // ──────────────────────────────────────────────────────────────────────────
 
     fun commit(next: WelcomePosterState) {
         if (next == state) return
@@ -230,7 +248,18 @@ internal fun WelcomePosterEditor(
         Box(Modifier.fillMaxWidth().weight(1f).padding(12.dp), contentAlignment = Alignment.Center) {
             ComposeCanvas(
                 Modifier.fillMaxWidth().aspectRatio(state.canvasWidth.toFloat() / state.canvasHeight)
-                    .pointerInput(state.elements) { detectTapGestures { point -> selectedId = hitWelcomeElement(point, size.width, size.height, state) } }
+                    .pointerInput(state.elements) {
+                        detectTapGestures { point ->
+                            val hit = hitWelcomeElement(point, size.width, size.height, state)
+                            val hitElement = hit?.let(state::element)
+                            if (hitElement != null && hitElement.role in BRANDING_ELEMENT_ROLES) {
+                                // Branding elements are read-only — direct user to Settings
+                                selectedId = null
+                            } else {
+                                selectedId = hit
+                            }
+                        }
+                    }
                     .pointerInput(selectedId) {
                         detectDragGestures(
                             onDragStart = { dragStart = latestState },
@@ -240,7 +269,8 @@ internal fun WelcomePosterEditor(
                             change.consume()
                             val id = selectedId ?: return@detectDragGestures
                             val current = latestState.element(id) ?: return@detectDragGestures
-                            if (current.locked) return@detectDragGestures
+                            // Never allow dragging branding elements
+                            if (current.locked || current.role in BRANDING_ELEMENT_ROLES) return@detectDragGestures
                             val nx = (current.x + drag.x * WelcomeCanvasSize / size.width).coerceIn(-current.width * .8f, WelcomeCanvasSize - current.width * .2f)
                             val ny = (current.y + drag.y * WelcomeCanvasSize / size.height).coerceIn(-current.height * .8f, WelcomeCanvasSize - current.height * .2f)
                             state = latestState.updateElement(id) { it.copy(x = nx, y = ny) }
@@ -250,7 +280,8 @@ internal fun WelcomePosterEditor(
         }
         selectedId?.let { id ->
             val selected = state.element(id)
-            if (selected != null) {
+            // Do not show an edit toolbar for branding elements — they are read-only
+            if (selected != null && selected.role !in BRANDING_ELEMENT_ROLES) {
                 LazyRow(Modifier.fillMaxWidth().padding(horizontal = 10.dp), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                     if (selected.type == "text" || selected.type == "icon") item { EditorChip("Edit", Icons.Default.Edit) { sheet = "text" } }
                     if (selected.type == "photo" || selected.type == "logo") item { EditorChip("Replace", Icons.Default.AddPhotoAlternate) { pendingImageId = id } }
@@ -270,6 +301,7 @@ internal fun WelcomePosterEditor(
             item { EditorChip("Photo", Icons.Default.AddPhotoAlternate) { sheet = "photo" } }
             item { EditorChip("Logo", Icons.Default.Image) { selectedId = state.elements.firstOrNull { it.type == "logo" }?.id; sheet = "photo" } }
             item { EditorChip("Color", Icons.Default.Palette) { sheet = "color" } }
+            item { EditorChip("Ribbon", Icons.Default.Palette) { selectedId = state.elements.firstOrNull { it.role == "nameRibbon" || it.id == "nameRibbon" || it.shape == "ribbon" }?.id ?: selectedId; sheet = "color" } }
             item { EditorChip("Background", Icons.Default.Image) { sheet = "background" } }
             item { EditorChip("Elements", Icons.Default.Layers) { sheet = "elements" } }
             item { EditorChip("Layers", Icons.Default.Layers) { sheet = "layers" } }
@@ -333,11 +365,20 @@ private fun WelcomeEditorSheet(
                         Button(onClick = onResetTemplate, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.RestartAlt, null); Text("Reset entire template") }
                     }
                 }
-                "elements" -> items(state.elements.sortedByDescending { it.zIndex }, key = { it.id }) { element ->
-                    Card(onClick = { onSelect(element.id) }, colors = CardDefaults.cardColors(containerColor = if (element.id == selectedId) Color(0xFF34245B) else MaterialTheme.colorScheme.surfaceVariant)) {
-                        Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(element.role.ifBlank { element.type }.replaceFirstChar(Char::uppercase), fontWeight = FontWeight.Bold)
-                            Text(if (element.locked) "Locked" else "Layer ${element.zIndex}")
+                "elements" -> {
+                    item {
+                        Text(
+                            "🔒 Branding (company, logo, phone, website) is read-only here.\nUpdate it in Settings → Profile to change across all posters.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    items(state.elements.filter { it.role !in BRANDING_ELEMENT_ROLES }.sortedByDescending { it.zIndex }, key = { it.id }) { element ->
+                        Card(onClick = { onSelect(element.id) }, colors = CardDefaults.cardColors(containerColor = if (element.id == selectedId) Color(0xFF34245B) else MaterialTheme.colorScheme.surfaceVariant)) {
+                            Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(element.role.ifBlank { element.type }.replaceFirstChar(Char::uppercase), fontWeight = FontWeight.Bold)
+                                Text(if (element.locked) "Locked" else "Layer ${element.zIndex}")
+                            }
                         }
                     }
                 }
@@ -394,14 +435,43 @@ private fun WelcomeEditorSheet(
                     }
                 }
                 "color" -> item {
-                    if (selected == null) Text("Select an element first.") else LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(listOf("#FFFFFF", "#F4C553", "#071C36", "#0A7898", "#7B186F", "#8B2442", "#0A7359", "#111111")) { hex ->
-                            AssistChip(onClick = { onCommit(state.updateElement(selected.id) { it.copy(color = hex, paletteRole = "") }) }, label = { Text("●", color = Color(AndroidColor.parseColor(hex)), fontSize = 28.sp) })
+                    if (selected == null) {
+                        Text("Select an element first.")
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            val colors = listOf(
+                                "#FFFFFF", "#FFF9E6", "#F6C957", "#DA9C20", "#D91696", "#A81498",
+                                "#7B1FA2", "#3F51B5", "#1E88E5", "#0288D1", "#00897B", "#2E7D32",
+                                "#D32F2F", "#C2185B", "#E65100", "#140124", "#0D1B2A", "#111111"
+                            )
+                            Text("Fill / Main Color (${selected.role.ifBlank { selected.type }})", fontWeight = FontWeight.Bold)
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                items(colors) { hex ->
+                                    AssistChip(
+                                        onClick = { onCommit(state.updateElement(selected.id) { it.copy(color = hex, paletteRole = "") }) },
+                                        label = { Text("●", color = Color(AndroidColor.parseColor(hex)), fontSize = 28.sp) }
+                                    )
+                                }
+                            }
+                            if (selected.borderWidth > 0f) {
+                                Text("Border / Trim Color", fontWeight = FontWeight.Bold)
+                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    items(colors) { hex ->
+                                        AssistChip(
+                                            onClick = { onCommit(state.updateElement(selected.id) { it.copy(borderColor = hex) }) },
+                                            label = { Text("●", color = Color(AndroidColor.parseColor(hex)), fontSize = 28.sp) }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
                 "layers" -> item {
-                    if (selected == null) Text("Select an element first.") else Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val isBranding = selected != null && selected.role in BRANDING_ELEMENT_ROLES
+                    if (selected == null) Text("Select an element first.")
+                    else if (isBranding) Text("🔒 Branding elements are managed in Settings → Profile.")
+                    else Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = { onCommit(state.updateElement(selected.id) { it.copy(zIndex = it.zIndex + 1) }) }, Modifier.fillMaxWidth()) { Text("Bring Forward") }
                         Button(onClick = { onCommit(state.updateElement(selected.id) { it.copy(zIndex = it.zIndex - 1) }) }, Modifier.fillMaxWidth()) { Text("Send Backward") }
                         Button(onClick = { onCommit(state.updateElement(selected.id) { it.copy(zIndex = (state.elements.maxOfOrNull { e -> e.zIndex } ?: 0) + 1) }) }, Modifier.fillMaxWidth()) { Text("Bring to Front") }
@@ -424,7 +494,10 @@ private fun WelcomeEditorSheet(
 private fun hitWelcomeElement(point: Offset, width: Int, height: Int, state: WelcomePosterState): String? {
     val x = point.x * state.canvasWidth / width.coerceAtLeast(1)
     val y = point.y * state.canvasHeight / height.coerceAtLeast(1)
-    return state.elements.filter { it.visible && x in it.x..(it.x + it.width) && y in it.y..(it.y + it.height) }.maxByOrNull { it.zIndex }?.id
+    // Exclude branding elements — they are read-only and managed via Settings
+    return state.elements
+        .filter { it.visible && it.role !in BRANDING_ELEMENT_ROLES && x in it.x..(it.x + it.width) && y in it.y..(it.y + it.height) }
+        .maxByOrNull { it.zIndex }?.id
 }
 
 internal fun drawWelcomePoster(canvas: Canvas, width: Float, height: Float, state: WelcomePosterState, assets: WelcomeRenderAssets, selected: String? = null) {
@@ -476,7 +549,25 @@ internal fun drawWelcomePoster(canvas: Canvas, width: Float, height: Float, stat
             "shape" -> {
                 paint.style = Paint.Style.FILL; paint.color = elementColor(element)
                 when (element.shape) {
-                    "circle" -> canvas.drawOval(rect, paint)
+                    "circle" -> {
+                        if (element.role == "glow") {
+                            val gc = elementColor(element)
+                            paint.shader = android.graphics.RadialGradient(
+                                rect.centerX(), rect.centerY(), rect.width() / 2f,
+                                intArrayOf(
+                                    AndroidColor.argb((220 * element.opacity).toInt().coerceIn(0, 255), AndroidColor.red(gc), AndroidColor.green(gc), AndroidColor.blue(gc)),
+                                    AndroidColor.argb((60 * element.opacity).toInt().coerceIn(0, 255), AndroidColor.red(gc), AndroidColor.green(gc), AndroidColor.blue(gc)),
+                                    AndroidColor.TRANSPARENT
+                                ),
+                                floatArrayOf(0f, 0.55f, 1f),
+                                Shader.TileMode.CLAMP
+                            )
+                            canvas.drawOval(rect, paint)
+                            paint.shader = null
+                        } else {
+                            canvas.drawOval(rect, paint)
+                        }
+                    }
                     "ribbon" -> {
                         val path = Path().apply {
                             val notch = rect.height() * 0.28f
@@ -515,6 +606,10 @@ internal fun drawWelcomePoster(canvas: Canvas, width: Float, height: Float, stat
             }
             "photo", "logo" -> {
                 val bitmap = assets.images[element.id]
+                if (bitmap == null && element.type == "photo") {
+                    canvas.restore()
+                    return@forEach
+                }
                 val isLeader = element.id.startsWith("leaderPhoto")
                 if (isLeader) {
                     // Double gold minted rim for executive leadership medals
@@ -540,7 +635,8 @@ internal fun drawWelcomePoster(canvas: Canvas, width: Float, height: Float, stat
                         else addRoundRect(rect, element.cornerRadius, element.cornerRadius, Path.Direction.CW)
                     }
                     canvas.clipPath(clip)
-                    val scale = max(rect.width() / bitmap.width, rect.height() / bitmap.height) * element.cropScale
+                    // Fit the complete uploaded portrait so heads and faces are never clipped by a frame.
+                    val scale = min(rect.width() / bitmap.width, rect.height() / bitmap.height) * element.cropScale.coerceIn(1f, 1.15f)
                     val dw = bitmap.width * scale; val dh = bitmap.height * scale
                     val dx = element.cropX.coerceIn(-max(0f, (dw - rect.width()) / 2), max(0f, (dw - rect.width()) / 2))
                     val dy = element.cropY.coerceIn(-max(0f, (dh - rect.height()) / 2), max(0f, (dh - rect.height()) / 2))
@@ -572,7 +668,7 @@ internal fun drawWelcomePoster(canvas: Canvas, width: Float, height: Float, stat
 }
 
 private fun drawElementText(canvas: Canvas, element: WelcomePosterElement, paint: Paint, resolvedColor: Int, theme: WelcomeTheme? = null) {
-    val isGold3D = element.id == "welcomeHeadline" || element.id == "platformLine"
+    val isGold3D = element.id == "welcomeHeadline" || element.role == "welcomeHeadline" || element.id == "platformLine"
     val isHindi = element.id == "quote" || element.id == "sloganText"
     val tp = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
         color = resolvedColor

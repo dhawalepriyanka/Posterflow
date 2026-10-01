@@ -292,10 +292,11 @@ fun FixedBrandingSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            val phone = branding.phone.ifBlank { "+91 98765 43210" }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                Icon(Icons.Default.Phone, contentDescription = null, tint = accentColor, modifier = Modifier.size(11.dp))
-                Text(phone, color = textColor, fontSize = 9.sp, fontWeight = FontWeight.Medium)
+            if (branding.phone.isNotBlank()) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Icon(Icons.Default.Phone, contentDescription = null, tint = accentColor, modifier = Modifier.size(11.dp))
+                    Text(branding.phone, color = textColor, fontSize = 9.sp, fontWeight = FontWeight.Medium)
+                }
             }
 
             if (branding.website.isNotBlank()) {
@@ -314,15 +315,16 @@ fun FixedBrandingSection(
         }
 
         // Row 3: Company name centered
-        val companyName = branding.company.ifBlank { "YOUR BUSINESS" }
-        Text(
-            text = companyName.uppercase(),
-            color = textColor.copy(alpha = 0.9f),
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 9.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (branding.company.isNotBlank()) {
+            Text(
+                text = branding.company.uppercase(),
+                color = textColor.copy(alpha = 0.9f),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 9.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 

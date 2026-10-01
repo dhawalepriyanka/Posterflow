@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -40,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -127,18 +129,39 @@ internal fun FastPosterBrowsingScreen(
         templates.firstOrNull { it.id == selectedTemplateId } ?: templates.firstOrNull()
     }
 
-    // 2. Person Photo Selection (auto-defaults to Profile photo if available)
-    var selectedPersonPhoto by rememberSaveable(profile.profilePhotoUri) {
-        mutableStateOf(profile.profilePhotoUri)
+    // 2. Person Photo Selection — poster-specific, NOT tied to profile photo.
+    //    Starts empty; user picks their own photo for each poster.
+    //    Changing profile photo in Settings must NOT reset this.
+    var selectedPersonPhoto by rememberSaveable { mutableStateOf("") }
+    var backgroundRemovedPhoto by rememberSaveable { mutableStateOf("") }
+    var useBackgroundRemovedPhoto by rememberSaveable { mutableStateOf(false) }
+    // Person name and designation — poster-specific overrides
+    // For Welcome templates, the leader branding already carries the owner's name/title from App Settings,
+    // so the welcomee slots start empty and ready for the user to edit.
+    val isGreetCategory = category.equals("Welcome", ignoreCase = true) || category.equals("Birthday", ignoreCase = true)
+    var customPersonName by rememberSaveable(category) {
+        mutableStateOf(if (isGreetCategory) "" else profile.userName)
     }
-    // Person name and designation override state (defaults to Profile)
-    var customPersonName by rememberSaveable(profile.userName) { mutableStateOf(profile.userName) }
-    var customDesignation by rememberSaveable(profile.tagline) { mutableStateOf(profile.tagline) }
+    var customDesignation by rememberSaveable(category) {
+        mutableStateOf(if (isGreetCategory) "" else profile.tagline)
+    }
     var customMessage by rememberSaveable(initialMessage) { mutableStateOf(initialMessage.orEmpty()) }
     var customAmount by rememberSaveable { mutableStateOf("") }
     var customAchievement by rememberSaveable { mutableStateOf("") }
     var customQuote by rememberSaveable { mutableStateOf("") }
     var customCompany by rememberSaveable(profile.companyName) { mutableStateOf(profile.companyName) }
+    // Photo crop/pan/zoom — reset when photo changes
+    var customCropScale by rememberSaveable(selectedPersonPhoto) { mutableFloatStateOf(1f) }
+    var customCropPanX by rememberSaveable(selectedPersonPhoto) { mutableFloatStateOf(0f) }
+    var customCropPanY by rememberSaveable(selectedPersonPhoto) { mutableFloatStateOf(0f) }
+
+    var leaderCropScale by rememberSaveable(profile.leaderImageUri, profile.profilePhotoUri) { mutableFloatStateOf(1f) }
+    var leaderCropPanX by rememberSaveable(profile.leaderImageUri, profile.profilePhotoUri) { mutableFloatStateOf(0f) }
+    var leaderCropPanY by rememberSaveable(profile.leaderImageUri, profile.profilePhotoUri) { mutableFloatStateOf(0f) }
+
+    var logoCropScale by rememberSaveable(profile.companyLogoUri) { mutableFloatStateOf(1f) }
+    var logoCropPanX by rememberSaveable(profile.companyLogoUri) { mutableFloatStateOf(0f) }
+    var logoCropPanY by rememberSaveable(profile.companyLogoUri) { mutableFloatStateOf(0f) }
 
     var showEditSheet by remember { mutableStateOf(false) }
     var showProfileDialog by remember { mutableStateOf(false) }
@@ -152,7 +175,9 @@ internal fun FastPosterBrowsingScreen(
                 try {
                     val imported = TemplateImages.import(context, uri)
                     selectedPersonPhoto = imported
-                    snackbarMessage = "Photo updated for posters."
+                    backgroundRemovedPhoto = ""
+                    useBackgroundRemovedPhoto = false
+                    snackbarMessage = "Photo added. Choose the original or remove its background."
                 } catch (e: Exception) {
                     snackbarMessage = e.message ?: "Unable to load photo."
                 }
@@ -161,7 +186,7 @@ internal fun FastPosterBrowsingScreen(
     }
 
     // Build current design document using currently selected template + person + profile branding
-    val currentDesign = remember(selectedTemplate, selectedPersonPhoto, customPersonName, customDesignation, customMessage, customAmount, customAchievement, customQuote, customCompany, profile) {
+    val currentDesign = remember(selectedTemplate, selectedPersonPhoto, backgroundRemovedPhoto, useBackgroundRemovedPhoto, customPersonName, customDesignation, customMessage, customAmount, customAchievement, customQuote, customCompany, customCropScale, customCropPanX, customCropPanY, leaderCropScale, leaderCropPanX, leaderCropPanY, logoCropScale, logoCropPanX, logoCropPanY, profile) {
         if (selectedTemplate == null) null
         else {
             val values = mutableMapOf<String, String>()
@@ -173,12 +198,46 @@ internal fun FastPosterBrowsingScreen(
             if (customQuote.isNotBlank()) values[TemplateField.QUOTE.name] = customQuote
             if (customCompany.isNotBlank()) values[TemplateField.COMPANY.name] = customCompany
 
+            val removalApplies = selectedTemplate.id == -214 && useBackgroundRemovedPhoto && backgroundRemovedPhoto.isNotBlank()
             GeneratedPoster(
                 template = selectedTemplate,
                 values = values,
-                photo = selectedPersonPhoto,
+                photo = if (removalApplies) backgroundRemovedPhoto else selectedPersonPhoto,
+                originalPhoto = selectedPersonPhoto,
+                backgroundRemovedPhoto = backgroundRemovedPhoto,
+                backgroundRemoved = removalApplies,
+                crop = PhotoCrop(customCropScale, customCropPanX, customCropPanY),
+                leaderCrop = PhotoCrop(leaderCropScale, leaderCropPanX, leaderCropPanY),
+                logoCrop = PhotoCrop(logoCropScale, logoCropPanX, logoCropPanY),
                 branding = profile.businessBranding()
             )
+        }
+    }
+
+    fun useOriginalPhoto() {
+        useBackgroundRemovedPhoto = false
+        snackbarMessage = "Using the original photo."
+    }
+
+    fun removeSelectedPhotoBackground() {
+        if (busy || selectedPersonPhoto.isBlank()) return
+        if (backgroundRemovedPhoto.isNotBlank()) {
+            useBackgroundRemovedPhoto = true
+            snackbarMessage = "Transparent photo selected."
+            return
+        }
+        busy = true
+        scope.launch {
+            try {
+                backgroundRemovedPhoto = PhotoBackgroundRemover.remove(context, selectedPersonPhoto)
+                useBackgroundRemovedPhoto = true
+                snackbarMessage = "Background removed. You can still switch back to the original."
+            } catch (_: Exception) {
+                useBackgroundRemovedPhoto = false
+                snackbarMessage = "Background removal was not available. Using the original photo with soft edge blending."
+            } finally {
+                busy = false
+            }
         }
     }
 
@@ -238,7 +297,8 @@ internal fun FastPosterBrowsingScreen(
         scope.launch {
             try {
                 val bitmap = renderAndSave(design)
-                val state = VideoCustomizationState(title = design.template.name, duration = "10 Seconds", animationStyle = "Fade")
+                val defaultAnimation = if (design.template.category.equals("Welcome", ignoreCase = true)) "Mix Up" else "Fade"
+                val state = VideoCustomizationState(title = design.template.name, duration = "10 Seconds", animationStyle = defaultAnimation)
                 val uri = exportPosterBitmapVideoToGallery(context, bitmap, state, design.template.name) { progress = it }
                     ?: error("Video export failed.")
                 val thumb = withContext(Dispatchers.IO) {
@@ -284,6 +344,8 @@ internal fun FastPosterBrowsingScreen(
             }
         )
     }
+
+
 
     if (showEditSheet) {
         ModalBottomSheet(onDismissRequest = { showEditSheet = false }) {
@@ -353,6 +415,39 @@ internal fun FastPosterBrowsingScreen(
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 2
                     )
+                }
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = "Business Branding (From App Settings)",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Your Logo, Company Name, Mobile Number, Website, and Leader Photo are configured in App Settings.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        OutlinedButton(
+                            onClick = {
+                                showEditSheet = false
+                                onProfile()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(Icons.Default.Settings, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Edit App Settings")
+                        }
+                    }
                 }
                 Button(
                     onClick = { showEditSheet = false },
@@ -564,6 +659,9 @@ internal fun FastPosterBrowsingScreen(
                 Spacer(Modifier.height(8.dp))
 
                 // 1. TOP SECTION: LARGE PROFESSIONAL POSTER PREVIEW
+                // When a photo is loaded, the user can directly touch + drag / pinch on
+                // the template preview to adjust the person photo position and zoom.
+                var previewSizePx by remember { mutableIntStateOf(1) }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -575,7 +673,35 @@ internal fun FastPosterBrowsingScreen(
                         Card(
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .aspectRatio(1f),
+                                .aspectRatio(1f)
+                                .onSizeChanged { previewSizePx = it.width.coerceAtLeast(1) }
+                                .pointerInput(selectedTemplate?.id, selectedPersonPhoto, profile.companyLogoUri, profile.leaderImageUri) {
+                                    detectTransformGestures { centroid, pan, zoom, _ ->
+                                        val touchCanvasX = (centroid.x / previewSizePx) * 1080f
+                                        val touchCanvasY = (centroid.y / previewSizePx) * 1080f
+
+                                        val isLogoTouch = touchCanvasX < 320f && touchCanvasY < 180f && profile.companyLogoUri.isNotBlank()
+                                        val isLeaderTouch = selectedTemplate?.category.equals("Welcome", ignoreCase = true) &&
+                                                touchCanvasX < 300f && touchCanvasY > 780f &&
+                                                (profile.leaderImageUri.isNotBlank() || profile.profilePhotoUri.isNotBlank())
+
+                                        val panFactor = 3.2f / previewSizePx
+
+                                        if (isLogoTouch) {
+                                            logoCropScale = (logoCropScale * zoom).coerceIn(0.5f, 5f)
+                                            logoCropPanX = (logoCropPanX + pan.x * panFactor).coerceIn(-1.5f, 1.5f)
+                                            logoCropPanY = (logoCropPanY + pan.y * panFactor).coerceIn(-1.5f, 1.5f)
+                                        } else if (isLeaderTouch) {
+                                            leaderCropScale = (leaderCropScale * zoom).coerceIn(0.5f, 5f)
+                                            leaderCropPanX = (leaderCropPanX + pan.x * panFactor).coerceIn(-1.5f, 1.5f)
+                                            leaderCropPanY = (leaderCropPanY + pan.y * panFactor).coerceIn(-1.5f, 1.5f)
+                                        } else if (selectedPersonPhoto.isNotBlank()) {
+                                            customCropScale = (customCropScale * zoom).coerceIn(0.5f, 5f)
+                                            customCropPanX = (customCropPanX + pan.x * panFactor).coerceIn(-1.5f, 1.5f)
+                                            customCropPanY = (customCropPanY + pan.y * panFactor).coerceIn(-1.5f, 1.5f)
+                                        }
+                                    }
+                                },
                             shape = RoundedCornerShape(16.dp),
                             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -671,6 +797,29 @@ internal fun FastPosterBrowsingScreen(
                         Icon(Icons.Default.Download, contentDescription = "Download", modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(6.dp))
                         Text("DOWNLOAD", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    }
+                }
+
+                if (selectedTemplate?.category == "Welcome" && selectedPersonPhoto.isNotBlank()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        FilterChip(
+                            selected = !useBackgroundRemovedPhoto,
+                            onClick = ::useOriginalPhoto,
+                            enabled = !busy,
+                            label = { Text("Use Original") },
+                            leadingIcon = if (!useBackgroundRemovedPhoto) { { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) } } else null
+                        )
+                        FilterChip(
+                            selected = useBackgroundRemovedPhoto,
+                            onClick = ::removeSelectedPhotoBackground,
+                            enabled = !busy,
+                            label = { Text(if (busy) "Removing…" else "Remove Background") },
+                            leadingIcon = if (useBackgroundRemovedPhoto) { { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) } } else null
+                        )
                     }
                 }
 
@@ -834,11 +983,13 @@ internal fun ReadyPosterCustomize(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var encoded by rememberSaveable(initial.template.id, existing?.id) { 
-        mutableStateOf(TemplateJson.encodeDesign(if(existing == null) initial.copy(branding = profile.businessBranding()) else initial)) 
+        mutableStateOf(TemplateJson.encodeDesign(initial.copy(branding = profile.businessBranding()))) 
     }
-    val document = remember(encoded, profile, existing) { 
+    val document = remember(encoded, profile) { 
         val decoded = TemplateJson.design(encoded) ?: initial
-        if(existing == null) decoded.copy(branding = profile.businessBranding()) else decoded
+        // ALWAYS apply current Settings branding — poster photo & user data are preserved,
+        // but branding is never stored/restored from saved poster JSON.
+        decoded.copy(branding = profile.businessBranding())
     }
     val latest by rememberUpdatedState(document)
     var generated by remember { mutableStateOf<Bitmap?>(null) }
@@ -848,10 +999,12 @@ internal fun ReadyPosterCustomize(
     var progress by remember { mutableFloatStateOf(0f) }
     var cropControls by rememberSaveable { mutableStateOf(false) }
     var duration by rememberSaveable { mutableStateOf("10 Seconds") }
-    var animation by rememberSaveable { mutableStateOf("Fade") }
+    var animation by rememberSaveable {
+        mutableStateOf(if (initial.template.category.equals("Welcome", ignoreCase = true)) "Mix Up" else "Fade")
+    }
     var musicUri by rememberSaveable { mutableStateOf<String?>(null) }
     var musicResource by rememberSaveable { mutableStateOf<String?>(null) }
-    LaunchedEffect(profile.businessBranding()) { if(existing == null) generated = null }
+    LaunchedEffect(profile.businessBranding()) { generated = null }
     fun change(next: GeneratedPoster) { encoded = TemplateJson.encodeDesign(next); generated = null; message = "" }
     fun action(block: suspend () -> Unit) {
         if(busy) return
@@ -862,7 +1015,17 @@ internal fun ReadyPosterCustomize(
         }
     }
     val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if(uri != null) action { val source = TemplateImages.import(context, uri); change(latest.copy(photo = source, crop = PhotoCrop())); message = "Photo added. Adjust it inside the frame if needed." }
+        if(uri != null) action {
+            val source = TemplateImages.import(context, uri)
+            change(latest.copy(
+                photo = source,
+                originalPhoto = source,
+                backgroundRemovedPhoto = "",
+                backgroundRemoved = false,
+                crop = PhotoCrop()
+            ))
+            message = "Photo added. Choose the original or remove its background."
+        }
     }
     val musicPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if(uri != null) {
@@ -878,6 +1041,42 @@ internal fun ReadyPosterCustomize(
     }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if(granted) saveGallery() else message = "Storage permission is needed to save on this Android version. You can still share the poster."
+    }
+    fun useOriginalPhoto() {
+        val original = latest.originalPhoto.ifBlank { latest.photo }
+        if (original.isNotBlank()) {
+            change(latest.copy(photo = original, originalPhoto = original, backgroundRemoved = false))
+            message = "Using the original photo."
+        }
+    }
+    fun removePhotoBackground() {
+        if (busy) return
+        val original = latest.originalPhoto.ifBlank { latest.photo }
+        if (original.isBlank()) return
+        if (latest.backgroundRemovedPhoto.isNotBlank()) {
+            change(latest.copy(
+                photo = latest.backgroundRemovedPhoto,
+                originalPhoto = original,
+                backgroundRemoved = true
+            ))
+            message = "Transparent photo selected."
+            return
+        }
+        action {
+            try {
+                val processed = PhotoBackgroundRemover.remove(context, original)
+                change(latest.copy(
+                    photo = processed,
+                    originalPhoto = original,
+                    backgroundRemovedPhoto = processed,
+                    backgroundRemoved = true
+                ))
+                message = "Background removed. Crop, zoom and position are preserved."
+            } catch (_: Exception) {
+                change(latest.copy(photo = original, originalPhoto = original, backgroundRemoved = false))
+                message = "Background removal failed. Using the original photo with soft edge blending."
+            }
+        }
     }
     suspend fun persist(draft: GeneratedPoster, bitmap: Bitmap): Poster {
         val path = withContext(Dispatchers.IO) {
@@ -941,6 +1140,25 @@ internal fun ReadyPosterCustomize(
         if(TemplateField.PHOTO in document.template.visibleFields) item {
         Button(onClick = { photoPicker.launch(arrayOf("image/*")) }, enabled = !busy, modifier=Modifier.fillMaxWidth()) { Text(if(document.photo.isBlank()) "Choose photo" else "Change photo") }
         if(document.photo.isNotBlank()) {
+            if (document.template.id == -214) {
+                Text("Photo background", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = !document.backgroundRemoved,
+                        onClick = ::useOriginalPhoto,
+                        enabled = !busy,
+                        label = { Text("Use Original") },
+                        leadingIcon = if (!document.backgroundRemoved) { { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) } } else null
+                    )
+                    FilterChip(
+                        selected = document.backgroundRemoved,
+                        onClick = ::removePhotoBackground,
+                        enabled = !busy,
+                        label = { Text(if (busy) "Removing…" else "Remove Background") },
+                        leadingIcon = if (document.backgroundRemoved) { { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) } } else null
+                    )
+                }
+            }
             TextButton(onClick={cropControls=!cropControls},enabled=!busy) { Text(if(cropControls)"Done adjusting photo" else "Adjust photo") }
             if(cropControls) {
             Text("Adjust your photo inside the fixed frame. Drag to pan.")
@@ -985,7 +1203,7 @@ internal fun ReadyPosterCustomize(
             OutlinedButton(onClick={message="This poster is already saved in My Designs."},enabled=!busy,modifier=Modifier.fillMaxWidth()){Text("Saved to My Designs ✓")}
             Text("Create video",style=MaterialTheme.typography.titleMedium,modifier=Modifier.padding(top=12.dp))
             ChoiceRow(duration,listOf("5 Seconds","10 Seconds","15 Seconds")){if(!busy)duration=it}
-            ChoiceRow(animation,listOf("Fade","None","Zoom In")){if(!busy)animation=it}
+            ChoiceRow(animation,listOf("Mix Up","Fade","None","Zoom In")){if(!busy)animation=it}
             val musicCategory=document.template.category.lowercase().takeIf{it in listOf("welcome","birthday","achievement","income")} ?: "welcome"
             ChoiceRow(musicResource?.substringAfterLast("song")?.let{"Track $it"} ?: "No music",listOf("No music","Track 1","Track 2","Track 3")){choice->if(!busy){musicUri=null;musicResource=if(choice=="No music")null else "${musicCategory}_song${choice.last()}"}}
             TextButton(onClick={musicPicker.launch(arrayOf("audio/*"))},enabled=!busy){Text(if(musicUri==null)"Use music from phone (optional)" else "Change phone music")}

@@ -53,448 +53,223 @@ object StarterTemplates {
     }
 
     /* ---------------------------------------------------------------------- */
-    /* 1. WELCOME TEMPLATES (10 distinct layouts)                             */
+    /* 1. WELCOME TEMPLATES (4 exclusive fixed base designs)                  */
     /* ---------------------------------------------------------------------- */
     private val welcomeTemplates = listOf(
-        // 01 — ROYAL GOLD WELCOME: Black/deep-purple, gold concentric rings, confetti particles, gold name ribbon
+        // 01 — MODERN GREEN WELCOME: Clean emerald green & white, arched photo, name ribbon, leader branding
         PosterTemplate(
-            id = -201, name = "Royal Gold Welcome", category = "Welcome",
-            baseColor = "#0A0520", accentColor = "#F5C542", style = 130, order = 0, photoPosition = "right",
+            id = -201, name = "Modern Green Welcome", category = "Welcome",
+            baseColor = "#022616", accentColor = "#10B981", style = 141, order = 0, photoPosition = "right",
             supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
             header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#F8F4E8", textColor = "#1A0F30", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("✦ WELCOME ✦", 40f, 35f, 500f, 80f, size = 56f, color = "#F5C542", alignment = "left"),
-                StaticText("TO OUR TEAM", 40f, 115f, 500f, 50f, size = 32f, color = "#FFFFFF", alignment = "left", bold = false),
-                StaticText("We are thrilled to have you join us.\nYour journey to greatness begins here.", 40f, 540f, 500f, 90f, size = 20f, color = "#D4C8A0", alignment = "left", bold = false, maxLines = 3)
-            ),
+            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#022616", textColor = "#FFFFFF", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
+            staticTexts = emptyList(),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 540f, y = 40f, width = 500f, height = 560f, shape = "rounded", borderColor = "#F5C542", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 40f, y = 660f, width = 1000f, height = 65f, fontSize = 46f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 40f, y = 730f, width = 1000f, height = 45f, fontSize = 26f, color = "#F5C542", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 40f, y = 790f, width = 1000f, height = 60f, fontSize = 20f, color = "#E0D8C0", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 535f, y = 70f, width = 450f, height = 550f, shape = "arch", borderColor = "#00000000", borderWidth = 0f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 60f, y = 400f, width = 500f, height = 82f, fontSize = 36f, color = "#022616", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 70f, y = 502f, width = 485f, height = 50f, fontSize = 20f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 650f, y = 775f, width = 280f, height = 90f, fontSize = 18f, color = "#2D473B", alignment = "left")
             )
         ),
-        // 02 — CORPORATE BLUE WELCOME: Navy/royal-blue, diagonal split, geometric lines, guest right
+        // 02 — OCEAN CYAN WELCOME: Cyan, coral & blue modern geometric, photo card, name ribbon, leader branding
         PosterTemplate(
-            id = -202, name = "Corporate Blue Welcome", category = "Welcome",
-            baseColor = "#0A1A3A", accentColor = "#3B82F6", style = 131, order = 1, photoPosition = "right",
+            id = -202, name = "Ocean Cyan Welcome", category = "Welcome",
+            baseColor = "#051A30", accentColor = "#06B6D4", style = 142, order = 1, photoPosition = "right",
             supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
             header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#0D2451", textColor = "#FFFFFF", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WELCOME", 50f, 50f, 480f, 85f, size = 68f, color = "#3B82F6", alignment = "left"),
-                StaticText("TO THE TEAM", 50f, 135f, 480f, 55f, size = 38f, color = "#FFFFFF", alignment = "left"),
-                StaticText("Innovation • Integrity • Impact", 50f, 210f, 480f, 40f, size = 20f, color = "#93C5FD", alignment = "left", bold = false),
-                StaticText("Your expertise strengthens our mission.\nTogether, we build excellence.", 50f, 520f, 470f, 80f, size = 20f, color = "#BFDBFE", alignment = "left", bold = false, maxLines = 3)
-            ),
+            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#051A30", textColor = "#FFFFFF", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
+            staticTexts = emptyList(),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 560f, y = 40f, width = 480f, height = 560f, shape = "rounded", borderColor = "#3B82F6", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 50f, y = 640f, width = 980f, height = 60f, fontSize = 44f, color = "#FFFFFF", alignment = "left"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 50f, y = 705f, width = 980f, height = 45f, fontSize = 26f, color = "#60A5FA", alignment = "left"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 50f, y = 775f, width = 980f, height = 60f, fontSize = 20f, color = "#DBEAFE", alignment = "left", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 535f, y = 95f, width = 450f, height = 500f, shape = "rounded", borderColor = "#00000000", borderWidth = 0f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 75f, y = 382f, width = 455f, height = 82f, fontSize = 36f, color = "#051A30", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 120f, y = 488f, width = 360f, height = 46f, fontSize = 20f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 540f, y = 680f, width = 420f, height = 80f, fontSize = 18f, color = "#FFFFFF", alignment = "center")
             )
         ),
-        // 03 — PREMIUM PURPLE WELCOME: Purple/magenta/dark-blue, metallic gold title, central composition
+        // 03 — ROYAL BLUE CORPORATE WELCOME: Deep blue & silver corporate, glowing glass frame, name ribbon
         PosterTemplate(
-            id = -203, name = "Premium Purple Welcome", category = "Welcome",
-            baseColor = "#1A0535", accentColor = "#D4A843", style = 132, order = 2, photoPosition = "center",
+            id = -215, name = "Royal Blue Corporate Welcome", category = "Welcome",
+            baseColor = "#020D1E", accentColor = "#3B82F6", style = 144, order = 2, photoPosition = "right",
             supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
             header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#120328", textColor = "#E8D5A3", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WELCOME", 80f, 35f, 920f, 90f, size = 72f, color = "#D4A843", alignment = "center"),
-                StaticText("TO THE FAMILY", 80f, 125f, 920f, 45f, size = 30f, color = "#E8B4F8", alignment = "center", bold = false)
-            ),
+            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#020D1E", textColor = "#FFFFFF", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
+            staticTexts = emptyList(),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 300f, y = 190f, width = 480f, height = 420f, shape = "rounded", borderColor = "#D4A843", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 60f, y = 640f, width = 960f, height = 60f, fontSize = 46f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 60f, y = 710f, width = 960f, height = 45f, fontSize = 26f, color = "#D4A843", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 80f, y = 780f, width = 920f, height = 60f, fontSize = 20f, color = "#D8C8E8", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 575f, y = 75f, width = 405f, height = 630f, shape = "rounded", borderColor = "#00000000", borderWidth = 0f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 65f, y = 400f, width = 500f, height = 80f, fontSize = 36f, color = "#03142B", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 110f, y = 508f, width = 420f, height = 46f, fontSize = 20f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 50f, y = 640f, width = 480f, height = 80f, fontSize = 18f, color = "#FFFFFF", alignment = "center")
             )
         ),
-        // 04 — ELEGANT WHITE AND GOLD WELCOME: Cream/white bg, gold borders, serif-style, circular portrait
+        // 04 — PURPLE GOLD PREMIUM WELCOME: Vibrant purple, pink & gold fluid, right portrait, ribbon
         PosterTemplate(
-            id = -204, name = "Elegant White & Gold Welcome", category = "Welcome",
-            baseColor = "#FAF6ED", accentColor = "#B8860B", style = 133, order = 3, photoPosition = "center",
+            id = -214, name = "Purple Gold Premium Welcome", category = "Welcome",
+            baseColor = "#12002A", accentColor = "#F6C957", style = 143, order = 3, photoPosition = "right",
             supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
             header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#FFFFFF", textColor = "#3D2B1F", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("— WELCOME —", 80f, 40f, 920f, 75f, size = 52f, color = "#B8860B", alignment = "center"),
-                StaticText("We are honoured to have you with us", 100f, 120f, 880f, 40f, size = 22f, color = "#6B5B3E", alignment = "center", bold = false)
-            ),
+            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#12002A", textColor = "#FFFFFF", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
+            staticTexts = emptyList(),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 340f, y = 185f, width = 400f, height = 400f, shape = "circle", borderColor = "#B8860B", borderWidth = 6f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 60f, y = 620f, width = 960f, height = 60f, fontSize = 44f, color = "#2C1810", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 60f, y = 690f, width = 960f, height = 45f, fontSize = 24f, color = "#B8860B", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 80f, y = 760f, width = 920f, height = 70f, fontSize = 20f, color = "#5C4A3A", alignment = "center", bold = false, maxLines = 3)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 540f, y = 75f, width = 455f, height = 550f, shape = "cutout", borderColor = "#00000000", borderWidth = 0f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 60f, y = 486f, width = 495f, height = 90f, fontSize = 36f, color = "#150A21", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 120f, y = 603f, width = 365f, height = 42f, fontSize = 20f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 400f, y = 700f, width = 500f, height = 90f, fontSize = 18f, color = "#FFFFFF", alignment = "center")
             )
         ),
-        // 05 — RED CELEBRATION WELCOME: Red/maroon gradients, gold confetti, ribbon, guest cutout
+        // 05 — PURPLE GLOW WELCOME: Magenta & violet glow, ribbon name badge, leader branding footer (Hindi)
         PosterTemplate(
-            id = -205, name = "Red Celebration Welcome", category = "Welcome",
-            baseColor = "#3D0C0C", accentColor = "#F5C542", style = 134, order = 4, photoPosition = "center",
+            id = -217, name = "Purple Glow Welcome", category = "Welcome",
+            baseColor = "#18042B", accentColor = "#E879F9", style = 147, order = 4, photoPosition = "right",
             supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
             header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#FFF5F5", textColor = "#5C1010", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WELCOME", 80f, 35f, 920f, 90f, size = 72f, color = "#F5C542", alignment = "center"),
-                StaticText("A CELEBRATION OF NEW BEGINNINGS", 80f, 130f, 920f, 40f, size = 22f, color = "#FCA5A5", alignment = "center", bold = false)
-            ),
+            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#18042B", textColor = "#FFFFFF", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
+            staticTexts = emptyList(),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 290f, y = 190f, width = 500f, height = 440f, shape = "rounded", borderColor = "#F5C542", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 40f, y = 660f, width = 1000f, height = 60f, fontSize = 46f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 40f, y = 730f, width = 1000f, height = 45f, fontSize = 26f, color = "#F5C542", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 790f, width = 960f, height = 60f, fontSize = 20f, color = "#FEE2E2", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 490f, y = 120f, width = 550f, height = 650f, shape = "cutout", borderColor = "#00000000", borderWidth = 0f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 110f, y = 695f, width = 480f, height = 70f, fontSize = 34f, color = "#1A0030", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 125f, y = 748f, width = 420f, height = 48f, fontSize = 19f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 480f, width = 400f, height = 80f, fontSize = 18f, color = "#E879F9", alignment = "center")
             )
         ),
-        // 06 — MODERN GREEN WELCOME: Emerald/dark-green, curved shapes, professional portrait
+        // 06 — GOLDEN WAVE WELCOME: Obsidian black & luxury gold wave, learning badges, leader branding footer (Hindi)
         PosterTemplate(
-            id = -206, name = "Modern Green Welcome", category = "Welcome",
-            baseColor = "#062B20", accentColor = "#34D399", style = 135, order = 5, photoPosition = "left",
+            id = -218, name = "Golden Wave Welcome", category = "Welcome",
+            baseColor = "#0F0F10", accentColor = "#FBBF24", style = 148, order = 5, photoPosition = "right",
             supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
             header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#F0FDF9", textColor = "#064E3B", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WELCOME", 530f, 50f, 510f, 85f, size = 64f, color = "#34D399", alignment = "left"),
-                StaticText("ABOARD", 530f, 135f, 510f, 55f, size = 40f, color = "#FFFFFF", alignment = "left"),
-                StaticText("Growth • Excellence • Success", 530f, 210f, 510f, 40f, size = 20f, color = "#6EE7B7", alignment = "left", bold = false),
-                StaticText("Your vision and leadership will\nhelp us reach new heights.", 530f, 500f, 500f, 80f, size = 20f, color = "#A7F3D0", alignment = "left", bold = false, maxLines = 3)
-            ),
+            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#0F0F10", textColor = "#FFFFFF", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
+            staticTexts = emptyList(),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 40f, y = 40f, width = 470f, height = 560f, shape = "rounded", borderColor = "#34D399", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 40f, y = 640f, width = 1000f, height = 60f, fontSize = 44f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 40f, y = 710f, width = 1000f, height = 45f, fontSize = 26f, color = "#34D399", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 780f, width = 960f, height = 60f, fontSize = 20f, color = "#D1FAE5", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 530f, y = 180f, width = 500f, height = 590f, shape = "cutout", borderColor = "#00000000", borderWidth = 0f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 160f, y = 540f, width = 370f, height = 65f, fontSize = 32f, color = "#18181B", alignment = "left"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 60f, y = 600f, width = 470f, height = 44f, fontSize = 19f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 680f, width = 450f, height = 80f, fontSize = 18f, color = "#18181B", alignment = "center")
             )
         ),
-        // 07 — ORANGE SUCCESS WELCOME: Orange/black/gold, achievement theme, trophy outline, bold
+        // 07 — CORPORATE BLUE WAVE WELCOME: Deep navy & cyan wave, quote bubble, leader branding footer (Hindi)
         PosterTemplate(
-            id = -207, name = "Orange Success Welcome", category = "Welcome",
-            baseColor = "#1A0A00", accentColor = "#F97316", style = 136, order = 6, photoPosition = "center",
+            id = -219, name = "Corporate Blue Wave Welcome", category = "Welcome",
+            baseColor = "#031E3D", accentColor = "#38BDF8", style = 149, order = 6, photoPosition = "right",
             supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
             header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#1C1004", textColor = "#FDBA74", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WELCOME", 80f, 35f, 920f, 90f, size = 72f, color = "#F97316", alignment = "center"),
-                StaticText("SUCCESS BEGINS HERE", 80f, 130f, 920f, 40f, size = 24f, color = "#FED7AA", alignment = "center", bold = false)
-            ),
+            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#031E3D", textColor = "#FFFFFF", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
+            staticTexts = emptyList(),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 300f, y = 195f, width = 480f, height = 430f, shape = "rounded", borderColor = "#F97316", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 40f, y = 660f, width = 1000f, height = 60f, fontSize = 46f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 40f, y = 730f, width = 1000f, height = 45f, fontSize = 26f, color = "#F97316", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 790f, width = 960f, height = 60f, fontSize = 20f, color = "#FFEDD5", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 540f, y = 110f, width = 455f, height = 580f, shape = "cutout", borderColor = "#00000000", borderWidth = 0f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 60f, y = 482f, width = 480f, height = 66f, fontSize = 32f, color = "#031E3D", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 60f, y = 548f, width = 470f, height = 44f, fontSize = 19f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 620f, width = 450f, height = 80f, fontSize = 18f, color = "#031E3D", alignment = "center")
             )
         ),
-        // 08 — LUXURY BLACK WELCOME: Black bg, gold double borders, dramatic lighting, premium type
+        // 08 — BOTANICAL GREEN WELCOME: Fresh emerald & leaf motifs, positive team growth, leader branding (Hindi)
         PosterTemplate(
-            id = -208, name = "Luxury Black Welcome", category = "Welcome",
-            baseColor = "#080808", accentColor = "#D4AF37", style = 137, order = 7, photoPosition = "center",
+            id = -220, name = "Botanical Green Welcome", category = "Welcome",
+            baseColor = "#022B18", accentColor = "#22C55E", style = 150, order = 7, photoPosition = "right",
             supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
             header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#0F0F0F", textColor = "#D4AF37", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WELCOME", 80f, 40f, 920f, 85f, size = 70f, color = "#D4AF37", alignment = "center"),
-                StaticText("TO EXCELLENCE", 80f, 130f, 920f, 45f, size = 30f, color = "#FFFFFF", alignment = "center", bold = false)
-            ),
+            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#022B18", textColor = "#FFFFFF", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
+            staticTexts = emptyList(),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 240f, y = 200f, width = 600f, height = 420f, shape = "rounded", borderColor = "#D4AF37", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 40f, y = 655f, width = 1000f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 40f, y = 728f, width = 1000f, height = 45f, fontSize = 26f, color = "#D4AF37", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 790f, width = 960f, height = 60f, fontSize = 20f, color = "#C8B88A", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 495f, y = 115f, width = 510f, height = 515f, shape = "cutout", borderColor = "#00000000", borderWidth = 0f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 560f, y = 615f, width = 395f, height = 60f, fontSize = 30f, color = "#022616", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 575f, y = 678f, width = 365f, height = 44f, fontSize = 18f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 540f, width = 450f, height = 80f, fontSize = 18f, color = "#022616", alignment = "center")
             )
         ),
-        // 09 — FRESH GRADIENT WELCOME: Blue/cyan/violet gradient, glass panels, full-height cutout
+        // 09 — DYNAMIC MARATHI WELCOME: Navy blue & vibrant orange wave, teamwork badges, leader branding (Marathi)
         PosterTemplate(
-            id = -209, name = "Fresh Gradient Welcome", category = "Welcome",
-            baseColor = "#0F0A2A", accentColor = "#06B6D4", style = 138, order = 8, photoPosition = "left",
+            id = -221, name = "Dynamic Marathi Welcome", category = "Welcome",
+            baseColor = "#05142E", accentColor = "#F97316", style = 151, order = 8, photoPosition = "right",
             supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
             header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#0A0520CC", textColor = "#E0F2FE", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WELCOME", 520f, 50f, 520f, 85f, size = 64f, color = "#22D3EE", alignment = "left"),
-                StaticText("ON BOARD", 520f, 140f, 520f, 50f, size = 36f, color = "#FFFFFF", alignment = "left"),
-                StaticText("Fresh ideas, bold vision.\nLet's create the future together.", 520f, 460f, 500f, 80f, size = 20f, color = "#A5F3FC", alignment = "left", bold = false, maxLines = 3)
-            ),
+            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#05142E", textColor = "#FFFFFF", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
+            staticTexts = emptyList(),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 40f, y = 40f, width = 460f, height = 560f, shape = "rounded", borderColor = "#06B6D4", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 40f, y = 640f, width = 1000f, height = 60f, fontSize = 44f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 40f, y = 710f, width = 1000f, height = 45f, fontSize = 26f, color = "#22D3EE", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 780f, width = 960f, height = 60f, fontSize = 20f, color = "#CFFAFE", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // 10 — FLORAL WELCOME: Soft pastel pink/lavender, floral corners, elegant name frame
-        PosterTemplate(
-            id = -210, name = "Floral Welcome", category = "Welcome",
-            baseColor = "#FDF2F8", accentColor = "#DB2777", style = 139, order = 9, photoPosition = "center",
-            supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
-            header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#FFFFFF", textColor = "#831843", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("Welcome", 80f, 35f, 920f, 80f, size = 58f, color = "#DB2777", alignment = "center"),
-                StaticText("With warmth and joy", 80f, 118f, 920f, 40f, size = 22f, color = "#9D174D", alignment = "center", bold = false)
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 310f, y = 185f, width = 460f, height = 420f, shape = "rounded", borderColor = "#F472B6", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 60f, y = 640f, width = 960f, height = 60f, fontSize = 44f, color = "#831843", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 60f, y = 710f, width = 960f, height = 45f, fontSize = 24f, color = "#DB2777", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 80f, y = 775f, width = 920f, height = 65f, fontSize = 20f, color = "#9D174D", alignment = "center", bold = false, maxLines = 3)
-            )
-        ),
-        // 11 — INDIAN TRADITIONAL WELCOME: Maroon/saffron/gold, traditional motifs, decorative heading
-        PosterTemplate(
-            id = -211, name = "Indian Traditional Welcome", category = "Welcome",
-            baseColor = "#3D0A0A", accentColor = "#F59E0B", style = 140, order = 10, photoPosition = "center",
-            supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
-            header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#FFF7ED", textColor = "#7C2D12", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("स्वागत", 80f, 35f, 920f, 85f, size = 68f, color = "#F59E0B", alignment = "center"),
-                StaticText("WELCOME TO THE FAMILY", 80f, 125f, 920f, 40f, size = 24f, color = "#FCD34D", alignment = "center", bold = false)
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 310f, y = 190f, width = 460f, height = 420f, shape = "rounded", borderColor = "#F59E0B", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 40f, y = 645f, width = 1000f, height = 60f, fontSize = 46f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 40f, y = 715f, width = 1000f, height = 45f, fontSize = 26f, color = "#F59E0B", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 785f, width = 960f, height = 60f, fontSize = 20f, color = "#FDE68A", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // 12 — MINIMAL PROFESSIONAL WELCOME: White/charcoal/accent, strong grid, large portrait
-        PosterTemplate(
-            id = -212, name = "Minimal Professional Welcome", category = "Welcome",
-            baseColor = "#FAFAFA", accentColor = "#1F2937", style = 141, order = 11, photoPosition = "center",
-            supportedBranding = setOf(BrandingField.LOGO, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
-            header = BrandingBand(enabled = false),
-            footer = BrandingBand(enabled = true, height = 200f, backgroundColor = "#F3F4F6", textColor = "#1F2937", showLogo = true, showCompanyName = true, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WELCOME", 60f, 45f, 960f, 80f, size = 64f, color = "#1F2937", alignment = "left"),
-                StaticText("We believe great people build great companies.", 60f, 130f, 960f, 40f, size = 20f, color = "#6B7280", alignment = "left", bold = false)
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 60f, y = 195f, width = 960f, height = 400f, shape = "rounded", borderColor = "#D1D5DB", borderWidth = 3f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 60f, y = 630f, width = 960f, height = 60f, fontSize = 44f, color = "#111827", alignment = "left"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 60f, y = 700f, width = 960f, height = 45f, fontSize = 24f, color = "#4B5563", alignment = "left"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 60f, y = 770f, width = 960f, height = 65f, fontSize = 20f, color = "#6B7280", alignment = "left", bold = false, maxLines = 3)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 535f, y = 155f, width = 500f, height = 600f, shape = "cutout", borderColor = "#00000000", borderWidth = 0f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 540f, width = 490f, height = 65f, fontSize = 32f, color = "#05142E", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 85f, y = 608f, width = 485f, height = 44f, fontSize = 19f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 80f, y = 680f, width = 450f, height = 80f, fontSize = 18f, color = "#05142E", alignment = "center")
             )
         )
     )
 
     /* ---------------------------------------------------------------------- */
-    /* 2. BIRTHDAY TEMPLATES (12 distinct professional compositions)         */
+    /* 2. BIRTHDAY TEMPLATES (5 curated high-fidelity base-template posters)  */
     /* ---------------------------------------------------------------------- */
     private val birthdayTemplates = listOf(
-        // 01 — ROYAL BIRTHDAY: Dark navy + gold celebration effects, circular portrait, gift elements, name ribbon
+        // 01 — HINDI NAVY CELEBRATION (bday_hindi_navy_base.jpg)
         PosterTemplate(
-            id = -301, name = "Royal Birthday", category = "Birthday",
-            baseColor = "#12133B", accentColor = "#F9D162", style = 201, order = 0,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#090A22", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#FFF9E6", textColor = "#12133B", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("HAPPY BIRTHDAY", 80f, 135f, 920f, 85f, size = 70f, color = "#F9D162", alignment = "center"),
-                StaticText("WISHING YOU SUCCESS, HAPPINESS & HEALTH", 80f, 225f, 920f, 40f, size = 22f, color = "#FFFFFF", alignment = "center", bold = false)
-            ),
+            id = -301, name = "Hindi Royal Navy Birthday", category = "Birthday",
+            baseColor = "#0D2344", accentColor = "#F5B738", style = 201, order = 0,
+            backgroundArtwork = "res:bday_hindi_navy_base",
+            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
+            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#0D2344", textColor = "#FFFFFF", showLogo = true),
+            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#FFFFFF", textColor = "#0D2344", showLogo = false, showPhone = true, showWebsite = true),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 340f, y = 285f, width = 400f, height = 400f, shape = "circle", borderColor = "#F9D162", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 720f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 80f, y = 790f, width = 920f, height = 45f, fontSize = 26f, color = "#F9D162", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 80f, y = 845f, width = 920f, height = 75f, fontSize = 22f, color = "#E2E5F8", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 606f, y = 140f, width = 424f, height = 424f, shape = "circle", borderColor = "#F5B738", borderWidth = 5f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 615f, y = 576f, width = 405f, height = 74f, fontSize = 32f, color = "#132238", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 690f, y = 656f, width = 255f, height = 44f, fontSize = 18f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 80f, y = 430f, width = 440f, height = 160f, fontSize = 20f, color = "#FFFFFF", alignment = "left")
             )
         ),
-        // 02 — GOLDEN WISHES: Black + champagne gold, portrait right, large birthday typography left
+        // 02 — HINDI PURPLE FESTIVE (bday_hindi_purple_base.jpg)
         PosterTemplate(
-            id = -302, name = "Golden Wishes", category = "Birthday",
-            baseColor = "#12100E", accentColor = "#F5C75D", style = 202, order = 1,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#0A0908", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#0A0908", textColor = "#F5C75D", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("HAPPY\nBIRTHDAY", 70f, 180f, 460f, 210f, size = 68f, color = "#F5C75D", alignment = "left"),
-                StaticText("MAY ALL YOUR DREAMS COME TRUE", 70f, 405f, 460f, 60f, size = 22f, color = "#E8D8B8", alignment = "left", bold = false)
-            ),
+            id = -302, name = "Hindi Purple Festive Birthday", category = "Birthday",
+            baseColor = "#2A0538", accentColor = "#F3C64A", style = 202, order = 1,
+            backgroundArtwork = "res:bday_hindi_purple_base",
+            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
+            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#2A0538", textColor = "#FFFFFF", showLogo = true),
+            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#20022B", textColor = "#F3C64A", showLogo = false, showPhone = true, showWebsite = true),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 550f, y = 160f, width = 450f, height = 530f, shape = "rounded", borderColor = "#F5C75D", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 70f, y = 725f, width = 940f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "left"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 70f, y = 795f, width = 940f, height = 45f, fontSize = 26f, color = "#F5C75D", alignment = "left"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 70f, y = 850f, width = 940f, height = 70f, fontSize = 22f, color = "#DFD7CE", alignment = "left", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 40f, y = 115f, width = 450f, height = 450f, shape = "circle", borderColor = "#F3C64A", borderWidth = 5f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 60f, y = 495f, width = 410f, height = 85f, fontSize = 32f, color = "#4A0638", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 105f, y = 584f, width = 320f, height = 46f, fontSize = 18f, color = "#F3C64A", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 80f, y = 690f, width = 400f, height = 150f, fontSize = 20f, color = "#3A0630", alignment = "left")
             )
         ),
-        // 03 — BLUE CELEBRATION: Navy + royal blue + gold, portrait left, birthday message panel right
+        // 03 — MARATHI TEAL (bday_marathi_teal_base.jpg)
         PosterTemplate(
-            id = -303, name = "Blue Celebration", category = "Birthday",
-            baseColor = "#0A1D37", accentColor = "#E6C687", style = 203, order = 2,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#061224", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#F3F7FC", textColor = "#0A1D37", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WARMEST\nWISHES", 540f, 180f, 470f, 200f, size = 64f, color = "#E6C687", alignment = "left"),
-                StaticText("ON YOUR SPECIAL DAY", 540f, 395f, 470f, 50f, size = 24f, color = "#B0CBEA", alignment = "left", bold = false)
-            ),
+            id = -303, name = "Marathi Teal Birthday", category = "Birthday",
+            baseColor = "#F6F3EB", accentColor = "#D4AF37", style = 203, order = 2,
+            backgroundArtwork = "res:bday_marathi_teal_base",
+            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
+            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#F6F3EB", textColor = "#0E3F3B", showLogo = true),
+            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#FFFFFF", textColor = "#0E3F3B", showLogo = false, showPhone = true, showWebsite = true),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 70f, y = 160f, width = 440f, height = 530f, shape = "rounded", borderColor = "#E6C687", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 70f, y = 725f, width = 940f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "left"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 70f, y = 795f, width = 940f, height = 45f, fontSize = 26f, color = "#E6C687", alignment = "left"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 70f, y = 850f, width = 940f, height = 70f, fontSize = 22f, color = "#CBDDF2", alignment = "left", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 545f, y = 130f, width = 450f, height = 585f, shape = "arch", borderColor = "#D4AF37", borderWidth = 5f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 55f, y = 465f, width = 440f, height = 90f, fontSize = 34f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 145f, y = 560f, width = 260f, height = 48f, fontSize = 18f, color = "#0E3F3B", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 80f, y = 620f, width = 400f, height = 140f, fontSize = 20f, color = "#0E3F3B", alignment = "left")
             )
         ),
-        // 04 — EXECUTIVE BIRTHDAY: Clean premium business look, white + navy + gold, large portrait
+        // 04 — ENGLISH BLUE CELEBRATION (bday_english_blue_base.jpg)
         PosterTemplate(
-            id = -304, name = "Executive Birthday", category = "Birthday",
-            baseColor = "#0C2340", accentColor = "#C59B27", style = 204, order = 3,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#071629", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#F8FAFC", textColor = "#0C2340", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("HAPPY BIRTHDAY", 80f, 135f, 920f, 80f, size = 62f, color = "#C59B27", alignment = "center"),
-                StaticText("EXECUTIVE LEADERSHIP • EXCELLENCE • VISION", 80f, 220f, 920f, 40f, size = 20f, color = "#FFFFFF", alignment = "center", bold = false)
-            ),
+            id = -304, name = "English Blue Royal Birthday", category = "Birthday",
+            baseColor = "#042364", accentColor = "#F7CA4D", style = 204, order = 3,
+            backgroundArtwork = "res:bday_english_blue_base",
+            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
+            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#042364", textColor = "#FFFFFF", showLogo = true),
+            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#031D56", textColor = "#F7CA4D", showLogo = false, showPhone = true, showWebsite = true),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 330f, y = 280f, width = 420f, height = 420f, shape = "rounded", borderColor = "#C59B27", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 725f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 80f, y = 795f, width = 920f, height = 45f, fontSize = 26f, color = "#C59B27", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 850f, width = 880f, height = 70f, fontSize = 22f, color = "#E0EAF5", alignment = "center", bold = false, maxLines = 2)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 525f, y = 75f, width = 505f, height = 505f, shape = "circle", borderColor = "#F7CA4D", borderWidth = 5f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 75f, y = 442f, width = 595f, height = 96f, fontSize = 34f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 225f, y = 545f, width = 295f, height = 50f, fontSize = 18f, color = "#072F7E", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 80f, y = 610f, width = 430f, height = 150f, fontSize = 20f, color = "#042364", alignment = "left")
             )
         ),
-        // 05 — PURPLE CELEBRATION: Purple + violet + gold, curved glow effects, celebration graphics
+        // 05 — ENGLISH PINK GLITTER (bday_english_pink_base.jpg)
         PosterTemplate(
-            id = -305, name = "Purple Celebration", category = "Birthday",
-            baseColor = "#2C083D", accentColor = "#FFC857", style = 205, order = 4,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#1C0428", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#FFF8ED", textColor = "#2C083D", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("BIRTHDAY CELEBRATION", 80f, 135f, 920f, 85f, size = 64f, color = "#FFC857", alignment = "center")
-            ),
+            id = -305, name = "English Pink Glitter Birthday", category = "Birthday",
+            baseColor = "#180018", accentColor = "#E5B842", style = 205, order = 4,
+            backgroundArtwork = "res:bday_english_pink_base",
+            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PHONE, BrandingField.WEBSITE),
+            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#180018", textColor = "#FFFFFF", showLogo = true),
+            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#0E030E", textColor = "#E5B842", showLogo = false, showPhone = true, showWebsite = true),
             slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 340f, y = 250f, width = 400f, height = 450f, shape = "rounded", borderColor = "#FFC857", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 725f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 80f, y = 795f, width = 920f, height = 45f, fontSize = 26f, color = "#FFC857", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 850f, width = 880f, height = 70f, fontSize = 22f, color = "#F6E0FF", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // 06 — BURGUNDY BIRTHDAY: Deep burgundy + gold, luxury gift elements, soft lighting
-        PosterTemplate(
-            id = -306, name = "Burgundy Birthday", category = "Birthday",
-            baseColor = "#360A14", accentColor = "#E6B800", style = 206, order = 5,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#20050B", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#20050B", textColor = "#E6B800", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WISHING YOU A JOYOUS BIRTHDAY", 80f, 140f, 920f, 75f, size = 50f, color = "#E6B800", alignment = "center")
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 340f, y = 245f, width = 400f, height = 460f, shape = "oval", borderColor = "#E6B800", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 730f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 80f, y = 800f, width = 920f, height = 45f, fontSize = 26f, color = "#E6B800", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 855f, width = 880f, height = 65f, fontSize = 22f, color = "#F7E1E6", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // 07 — EMERALD WISHES: Dark green + gold, elegant frame, portrait, premium greeting area
-        PosterTemplate(
-            id = -307, name = "Emerald Wishes", category = "Birthday",
-            baseColor = "#0B291B", accentColor = "#D4AF37", style = 207, order = 6,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#05180F", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#05180F", textColor = "#D4AF37", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("CELEBRATING YOUR LIFE", 80f, 140f, 920f, 75f, size = 52f, color = "#D4AF37", alignment = "center")
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 340f, y = 250f, width = 400f, height = 450f, shape = "rounded", borderColor = "#D4AF37", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 730f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 80f, y = 800f, width = 920f, height = 45f, fontSize = 26f, color = "#D4AF37", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 855f, width = 880f, height = 65f, fontSize = 22f, color = "#E0EFE6", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // 08 — MIDNIGHT CELEBRATION (Preserves legacy ID -101!): Midnight blue + gold particles
-        PosterTemplate(
-            id = -101, name = "Midnight Celebration", category = "Birthday",
-            baseColor = "#091024", accentColor = "#FFD166", style = 208, order = 7,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#040813", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#040813", textColor = "#FFD166", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("HAPPY BIRTHDAY", 80f, 135f, 920f, 85f, size = 68f, color = "#FFD166", alignment = "center"),
-                StaticText("WISHING YOU ENDLESS INSPIRATION & HAPPINESS", 80f, 225f, 920f, 40f, size = 22f, color = "#FFFFFF", alignment = "center", bold = false)
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 340f, y = 285f, width = 400f, height = 400f, shape = "circle", borderColor = "#FFD166", borderWidth = 5f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 725f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 80f, y = 795f, width = 920f, height = 45f, fontSize = 26f, color = "#FFD166", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 850f, width = 880f, height = 70f, fontSize = 22f, color = "#DFE7F8", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // 09 — FESTIVE GOLD: Warm orange-amber + gold, celebration fireworks, professional message
-        PosterTemplate(
-            id = -309, name = "Festive Gold", category = "Birthday",
-            baseColor = "#2E1504", accentColor = "#FFAA00", style = 209, order = 8,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#1A0B02", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#FFF8F0", textColor = "#2E1504", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("WARMEST BIRTHDAY GREETINGS", 80f, 140f, 920f, 75f, size = 52f, color = "#FFAA00", alignment = "center")
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 320f, y = 240f, width = 440f, height = 470f, shape = "rounded", borderColor = "#FFAA00", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 735f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 80f, y = 805f, width = 920f, height = 45f, fontSize = 26f, color = "#FFAA00", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 860f, width = 880f, height = 60f, fontSize = 22f, color = "#F6EAE1", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // 10 — CORPORATE BIRTHDAY: Blue + white, modern corporate clean diagonal composition
-        PosterTemplate(
-            id = -310, name = "Corporate Birthday", category = "Birthday",
-            baseColor = "#0E243A", accentColor = "#00A8E8", style = 210, order = 9,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#071421", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#F1F7FC", textColor = "#0E243A", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("HAPPY BIRTHDAY", 80f, 135f, 920f, 80f, size = 64f, color = "#00A8E8", alignment = "center"),
-                StaticText("VALUED TEAM MEMBER • BIGGER DREAMS AHEAD", 80f, 220f, 920f, 40f, size = 20f, color = "#FFFFFF", alignment = "center", bold = false)
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 330f, y = 280f, width = 420f, height = 420f, shape = "rounded", borderColor = "#00A8E8", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 725f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 80f, y = 795f, width = 920f, height = 45f, fontSize = 26f, color = "#00A8E8", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 850f, width = 880f, height = 70f, fontSize = 22f, color = "#DBECF8", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // 11 — BLACK ELITE: Obsidian black + champagne gold, executive visual style, large portrait
-        PosterTemplate(
-            id = -311, name = "Black Elite", category = "Birthday",
-            baseColor = "#0C0C0D", accentColor = "#D4AF37", style = 211, order = 10,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#050505", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#050505", textColor = "#D4AF37", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("EXECUTIVE BIRTHDAY WISHES", 80f, 140f, 920f, 75f, size = 50f, color = "#D4AF37", alignment = "center")
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 320f, y = 235f, width = 440f, height = 480f, shape = "rounded", borderColor = "#D4AF37", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 735f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 80f, y = 805f, width = 920f, height = 45f, fontSize = 26f, color = "#D4AF37", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 860f, width = 880f, height = 60f, fontSize = 22f, color = "#E8E2D5", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // 12 — BRIGHT CELEBRATION: Royal blue + magenta purple, glowing graphics, strong headline
-        PosterTemplate(
-            id = -312, name = "Bright Celebration", category = "Birthday",
-            baseColor = "#160C38", accentColor = "#FF3366", style = 212, order = 11,
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#0C0620", textColor = "#FFFFFF"),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#FFF0F4", textColor = "#160C38", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = listOf(
-                StaticText("CELEBRATE YOUR SPECIAL DAY", 80f, 140f, 920f, 80f, size = 52f, color = "#FF3366", alignment = "center")
-            ),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 330f, y = 250f, width = 420f, height = 450f, shape = "rounded", borderColor = "#FF3366", borderWidth = 4f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 80f, y = 725f, width = 920f, height = 65f, fontSize = 48f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 80f, y = 795f, width = 920f, height = 45f, fontSize = 26f, color = "#FF3366", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 100f, y = 850f, width = 880f, height = 70f, fontSize = 22f, color = "#FBE2EA", alignment = "center", bold = false, maxLines = 2)
-            )
-        ),
-        // 13 — BIRTHDAY GRATITUDE SCROLL: Midnight purple + fireworks + rolled gold scroll + diyas + lotus + dual pill badges
-        PosterTemplate(
-            id = -313, name = "Birthday Gratitude Scroll", category = "Birthday",
-            baseColor = "#150325", accentColor = "#FFCF48", style = 220, order = 12, photoPosition = "left",
-            supportedBranding = setOf(BrandingField.LOGO, BrandingField.BUSINESS_NAME, BrandingField.PROFILE_PHOTO, BrandingField.PERSON_NAME, BrandingField.DESIGNATION, BrandingField.PHONE),
-            header = BrandingBand(enabled = true, height = 110f, backgroundColor = "#0D0219", textColor = "#FFFFFF", showLogo = true),
-            footer = BrandingBand(enabled = true, height = 145f, backgroundColor = "#0D0219", textColor = "#FFCF48", showLogo = false, showPhone = true, showWebsite = true),
-            staticTexts = emptyList(),
-            slots = listOf(
-                TemplateSlot(TemplateField.PHOTO, required = true, x = 30f, y = 140f, width = 480f, height = 660f, shape = "rounded", borderColor = "#FFCF48", borderWidth = 3f),
-                TemplateSlot(TemplateField.NAME, required = true, x = 30f, y = 825f, width = 530f, height = 45f, fontSize = 32f, color = "#FFFFFF", alignment = "center"),
-                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 30f, y = 870f, width = 530f, height = 37f, fontSize = 18f, color = "#F472B6", alignment = "center"),
-                TemplateSlot(TemplateField.MESSAGE, required = false, x = 540f, y = 205f, width = 470f, height = 180f, fontSize = 22f, color = "#2B0B04", alignment = "center", bold = true, maxLines = 4)
+                TemplateSlot(TemplateField.PHOTO, required = true, x = 65f, y = 105f, width = 480f, height = 480f, shape = "circle", borderColor = "#E5B842", borderWidth = 5f),
+                TemplateSlot(TemplateField.NAME, required = true, x = 525f, y = 390f, width = 450f, height = 100f, fontSize = 34f, color = "#FFFFFF", alignment = "center"),
+                TemplateSlot(TemplateField.DESIGNATION, required = false, x = 595f, y = 498f, width = 310f, height = 47f, fontSize = 18f, color = "#E5B842", alignment = "center"),
+                TemplateSlot(TemplateField.MESSAGE, required = false, x = 560f, y = 600f, width = 380f, height = 160f, fontSize = 20f, color = "#FFFFFF", alignment = "left")
             )
         )
     )

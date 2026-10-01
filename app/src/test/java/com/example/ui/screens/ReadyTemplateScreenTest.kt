@@ -98,7 +98,7 @@ class ReadyTemplateScreenTest {
         // Assert action buttons exist
         compose.onNodeWithText("DOWNLOAD").assertIsDisplayed()
         compose.onNodeWithText("Edit").assertIsDisplayed()
-        // Assert choose design header shows all 12 templates
+        // Assert choose design header shows every Birthday template
         compose.onNodeWithText("Choose Design (13)").assertIsDisplayed()
         // Assert no raw input fields are on this browsing screen
         compose.onNodeWithText("Name *").assertDoesNotExist()
@@ -131,9 +131,38 @@ class ReadyTemplateScreenTest {
             }
         }
         compose.onNodeWithText("Welcome Templates").assertIsDisplayed()
-        compose.onNodeWithText("12 Ready Templates").assertIsDisplayed()
+        compose.onNodeWithText("4 Ready Templates").assertIsDisplayed()
         compose.onNodeWithText("Name *").assertDoesNotExist()
         compose.onNodeWithText("Designation (optional)").assertDoesNotExist()
+        database.close()
+    }
+
+    @Test fun purpleGoldWelcomeOffersOptionalBackgroundRemovalWithoutReplacingPhotoControls() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        FirebaseApp.initializeApp(context)
+        val database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).allowMainThreadQueries().build()
+        val viewModel = PosterViewModel(PosterRepository(database.posterDao()), context)
+        val template = StarterTemplates.all.single { it.id == -214 }
+        compose.setContent {
+            MaterialTheme {
+                ReadyPosterCustomize(
+                    initial = GeneratedPoster(
+                        template = template,
+                        photo = "res:sample_business_woman",
+                        originalPhoto = "res:sample_business_woman"
+                    ),
+                    viewModel = viewModel,
+                    profile = ProfileSettings(),
+                    onBack = {},
+                    onProfile = {}
+                )
+            }
+        }
+
+        compose.onNodeWithText("Use Original").assertExists()
+        compose.onNodeWithText("Remove Background").assertExists()
+        compose.onNodeWithText("Adjust photo").assertExists()
+        compose.onNodeWithText("Change photo").assertExists()
         database.close()
     }
 }

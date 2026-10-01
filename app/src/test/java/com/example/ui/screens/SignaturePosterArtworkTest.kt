@@ -25,7 +25,7 @@ class SignaturePosterArtworkTest {
         // Legacy renderer remains only for previously saved designs, not the active template library.
         assertEquals(setOf("Birthday", "Festival", "Motivation"), presets.filter { isSignatureTemplate(it.id) }.map { it.category }.toSet())
         assertEquals(13, presets.count { it.category == "Birthday" })
-        assertEquals(12, presets.count { it.category == "Welcome" })
+        assertEquals(4, presets.count { it.category == "Welcome" })
     }
 
     @Test fun renderOriginalsAndLongTextWithoutClippingOutsideCanvas() {

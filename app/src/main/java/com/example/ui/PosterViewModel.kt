@@ -37,6 +37,8 @@ data class ProfileSettings(
     val businessAddress: String = "",
     val tagline: String = "",
     val designation: String = "",
+    /** Branding/leader person image uploaded in Company Information settings. */
+    val leaderImageUri: String = "",
     val themeMode: String = ThemeManager.SYSTEM_DEFAULT,
     val newTemplateNotifications: Boolean = true,
     val festivalTemplateUpdates: Boolean = true,
@@ -109,6 +111,7 @@ class PosterViewModel(
                 businessAddress = preferences[ProfilePreferenceKeys.BusinessAddress].orEmpty(),
                 tagline = preferences[ProfilePreferenceKeys.Tagline].orEmpty(),
                 designation = preferences[ProfilePreferenceKeys.Designation].orEmpty(),
+                leaderImageUri = preferences[ProfilePreferenceKeys.LeaderImageUri].orEmpty(),
                 themeMode = preferences[ProfilePreferenceKeys.ThemeMode] ?: ThemeManager.SYSTEM_DEFAULT,
                 newTemplateNotifications = preferences[ProfilePreferenceKeys.NewTemplateNotifications] ?: true,
                 festivalTemplateUpdates = preferences[ProfilePreferenceKeys.FestivalTemplateUpdates] ?: true,
@@ -135,6 +138,15 @@ class PosterViewModel(
                 val path = TemplateImages.import(appContext, android.net.Uri.parse(uri))
                 updateStringPreference(ProfilePreferenceKeys.CompanyLogoUri, path)
             }.onFailure { showStatusMessage(it.message ?: "Could not import logo") }
+        }
+    }
+
+    fun updateLeaderImage(uri: String) {
+        viewModelScope.launch {
+            runCatching {
+                val path = TemplateImages.import(appContext, android.net.Uri.parse(uri))
+                updateStringPreference(ProfilePreferenceKeys.LeaderImageUri, path)
+            }.onFailure { showStatusMessage(it.message ?: "Could not import leader image") }
         }
     }
 
@@ -232,6 +244,7 @@ class PosterViewModel(
         val BusinessAddress = stringPreferencesKey("businessAddress")
         val Tagline = stringPreferencesKey("businessTagline")
         val Designation = stringPreferencesKey("designation")
+        val LeaderImageUri = stringPreferencesKey("leaderImageUri")
         val ProfilePhotoUri = stringPreferencesKey("profilePhotoUri")
         val UserName = stringPreferencesKey("userName")
         val UserEmail = stringPreferencesKey("userEmail")

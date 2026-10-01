@@ -85,14 +85,23 @@ data class BusinessBranding(
 
 fun ProfileSettings.businessBranding() = BusinessBranding(companyLogoUri, companyName, mobileNumber,
     websiteName, businessEmail, businessAddress, tagline,
-    profilePhotoUri, userName, designation)
+    leaderImageUri.ifBlank { profilePhotoUri }, userName, designation)
 
 data class PhotoCrop(val scale: Float = 1f, val panX: Float = 0f, val panY: Float = 0f)
 
 /** A complete immutable snapshot; editing/deleting an admin template cannot alter a saved poster. */
 data class GeneratedPoster(
     val template: PosterTemplate, val values: Map<String, String> = emptyMap(),
-    val photo: String = "", val crop: PhotoCrop = PhotoCrop(), val branding: BusinessBranding = BusinessBranding(),
+    val photo: String = "",
+    /** The durable, unmodified import used when background removal is turned off or fails. */
+    val originalPhoto: String = "",
+    /** Cached transparent PNG so toggling the option does not rerun segmentation. */
+    val backgroundRemovedPhoto: String = "",
+    val backgroundRemoved: Boolean = false,
+    val crop: PhotoCrop = PhotoCrop(),
+    val leaderCrop: PhotoCrop = PhotoCrop(),
+    val logoCrop: PhotoCrop = PhotoCrop(),
+    val branding: BusinessBranding = BusinessBranding(),
     val schemaVersion: Int = 1
 ) {
     fun missingFields() = template.requiredFields.filter {
